@@ -1,0 +1,62 @@
+<div class="cl-dash-card p-4">
+  <hr style="border-color:rgba(120,180,255,.14);margin-top:0">
+  <ul class="nav flex-column gap-1 nav-pills mb-0">
+    <li class="nav-item">
+      <a href="{{ '/customer/dashboard' | shopUrl }}" class="nav-link {{ 'cl-nav-active' if templateName == 'customer-dashboard' }}">
+        <i class="fa fa-gauge me-2"></i>Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ '/customer/invoices' | shopUrl }}" class="nav-link {{ 'cl-nav-active' if templateName == 'customer-invoices' }}">
+        <i class="fa fa-box me-2"></i>Orders
+      </a>
+    </li>
+    {% if shop.tickets_enabled %}
+      <li class="nav-item">
+        <a href="{{ '/customer/tickets' | shopUrl }}" class="nav-link {{ 'cl-nav-active' if templateName == 'customer-tickets' or templateName == 'customer-ticket' }}">
+          <i class="fa fa-headset me-2"></i>Tickets
+        </a>
+      </li>
+    {% endif %}
+    {% if shop.customer_balance_enabled %}
+      <li class="nav-item">
+        <a href="{{ '/customer/balance' | shopUrl }}" class="nav-link {{ 'cl-nav-active' if templateName == 'customer-balance' }}">
+          <i class="fa fa-wallet me-2"></i>Balance
+        </a>
+      </li>
+    {% endif %}
+    {% if shop.affiliate_enabled %}
+      <li class="nav-item">
+        <a href="{{ '/customer/affiliate' | shopUrl }}" class="nav-link {{ 'cl-nav-active' if templateName == 'customer-affiliate' }}">
+          <i class="fa fa-link me-2"></i>Affiliate
+        </a>
+      </li>
+    {% endif %}
+    <li class="nav-item mt-2">
+      <button type="button" @click="appCustomer.logout()" class="nav-link w-100 text-start" style="color:#f87171">
+        <i class="fa fa-right-from-bracket me-2"></i>Logout
+      </button>
+    </li>
+  </ul>
+</div>
+
+<style>
+.cl-dash-card{background:linear-gradient(180deg,#0c1628 0%,#08101e 100%);border:1px solid rgba(120,180,255,.14);border-radius:16px;color:#e6efff}
+.cl-stat-card{background:rgba(255,255,255,.03);border:1px solid rgba(120,180,255,.14);border-radius:14px}
+.cl-stat-label{font-size:.75rem;font-weight:700;letter-spacing:.06em;color:#9ab0cf;text-transform:uppercase;margin-bottom:.35rem}
+.cl-stat-value{font-size:1.5rem;font-weight:800;color:#e6efff}
+.cl-nav-active{background:rgba(59,130,246,.18)!important;color:#3b82f6!important}
+.nav-link{color:#9ab0cf;font-weight:600;border-radius:9px;transition:background .15s,color .15s}
+.nav-link:hover{color:#e6efff;background:rgba(255,255,255,.06)}
+.cl-dash-btn{display:inline-flex;align-items:center;justify-content:center;padding:.65rem 1.3rem;border-radius:10px;border:0;font-weight:800;color:#041224;background:linear-gradient(90deg,#1d4ed8,#3b82f6);box-shadow:0 8px 22px rgba(0,90,255,.3);transition:transform .15s,box-shadow .2s}
+.cl-dash-btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(0,90,255,.45);color:#041224}
+.cl-dash-btn:disabled{opacity:.6}
+.cl-dash-btn-outline{display:inline-flex;align-items:center;justify-content:center;padding:.55rem 1.1rem;border-radius:10px;font-weight:700;color:#3b82f6;background:transparent;border:1px solid rgba(59,130,246,.4);transition:border-color .15s,background .15s}
+.cl-dash-btn-outline:hover{border-color:#3b82f6;background:rgba(59,130,246,.1);color:#3b82f6}
+.cl-table{color:#e6efff;--bs-table-bg:transparent;--bs-table-border-color:rgba(120,180,255,.1)}
+.cl-table thead th{color:#9ab0cf;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;border-color:rgba(120,180,255,.14)}
+.cl-table tbody tr:hover{background:rgba(255,255,255,.03)}
+.cl-table td{border-color:rgba(120,180,255,.08);vertical-align:middle}
+.cl-textarea{background:#070a10;border:1px solid rgba(160,200,255,.14);color:#eaf2ff;border-radius:10px;resize:none}
+.cl-textarea:focus{background:#0a0f18;border-color:rgba(120,180,255,.5);box-shadow:0 0 0 3px rgba(33,150,243,.2);color:#fff}
+</style>

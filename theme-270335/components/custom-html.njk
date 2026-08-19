@@ -1,0 +1,16 @@
+{#
+  Raw HTML block. Renders the html property as-is.
+  'contained' wraps it in the standard container with section padding;
+  disable it for full-bleed embeds.
+#}
+{% if properties.contained != false %}
+  <section id="{{ componentId }}" class="component sa-custom-html py-section" data-component-id="{{ componentId }}">
+    <div class="wrap">
+      {{ properties.html | renderString | safe }}
+    </div>
+  </section>
+{% else %}
+  <section id="{{ componentId }}" class="component sa-custom-html" data-component-id="{{ componentId }}">
+    {{ properties.html | renderString | safe }}
+  </section>
+{% endif %}

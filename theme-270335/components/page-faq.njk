@@ -1,0 +1,62 @@
+{% set _faqVariant = properties.variant if properties.variant else 'accordion' %}
+
+{% macro faqPageItem(item, startOpen=false) %}
+  <div x-data="{ open: {{ 'true' if startOpen else 'false' }} }" class="sa-page-faq-item rounded-card border border-theme bg-surface overflow-hidden" data-dsr>
+    <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-4 px-5 py-4 text-left font-medium text-t-primary">
+      {{ item.question | renderString }}
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-t-muted shrink-0 transition-transform duration-theme" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="faq-panel {{ 'faq-panel-open' if startOpen }}" :class="{ 'faq-panel-open': open }">
+      <div class="faq-panel-inner">
+        <div class="px-5 pb-4 text-sm text-t-muted whitespace-pre-line">{{ item.answer | renderString }}</div>
+      </div>
+    </div>
+  </div>
+{% endmacro %}
+
+<section id="{{ componentId }}" class="component sa-page-faq sa-page-faq--{{ _faqVariant }} py-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    {% render_snippet "section-header.njk",
+      header_headline=properties.headline,
+      header_title=properties.title,
+      header_subtitle=properties.subtitle,
+      header_align=properties.header_align,
+      header_size='h1'
+    %}
+
+    {% if _faqVariant == 'grid-cards' %}
+      <div class="sa-page-faq-items grid grid-cols-1 md:grid-cols-2 gap-grid-gap">
+        {% for item in properties.items %}
+          <div class="sa-page-faq-item rounded-card border border-theme bg-surface shadow-card p-card" data-dsr>
+            <h3 class="font-medium text-t-primary">{{ item.question | renderString }}</h3>
+            <p class="text-sm text-t-muted mt-2 whitespace-pre-line">{{ item.answer | renderString }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% elif _faqVariant == 'accordion-2col' %}
+      <div class="sa-page-faq-items grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
+        {% for item in properties.items %}
+          {{ faqPageItem(item) }}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="sa-page-faq-items max-w-2xl {{ 'mx-auto' if (properties.header_align if properties.header_align else 'center') == 'center' }} flex flex-col gap-3">
+        {% for item in properties.items %}
+          {{ faqPageItem(item, loop.first) }}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if properties.support_card %}
+      <div class="mt-grid-gap {{ 'max-w-2xl' if _faqVariant == 'accordion' }} {{ 'mx-auto' if _faqVariant == 'accordion' and (properties.header_align if properties.header_align else 'center') == 'center' }}">
+        {% render_snippet "faq-support-card.njk",
+          sc_title=properties.support_title,
+          sc_text=properties.support_text,
+          sc_icon=properties.support_icon,
+          sc_cta_text=properties.support_cta_text,
+          sc_cta_link=properties.support_cta_link
+        %}
+      </div>
+    {% endif %}
+  </div>
+</section>

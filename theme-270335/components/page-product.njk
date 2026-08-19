@@ -1,0 +1,346 @@
+{% set _pLayout = properties.layout if properties.layout else 'classic-split' %}
+{% set _pTitlePos = properties.title_position if properties.title_position else 'above' %}
+{% set _pContent = properties.content_style if properties.content_style else 'tabs' %}
+{% set _pGallery = properties.gallery_style if properties.gallery_style else 'bottom' %}
+{% set _pFeedbackPlace = properties.feedbacks_placement if properties.feedbacks_placement else 'tab' %}
+
+{% macro titleBlock(size='text-h1') %}
+  <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between" data-dsr>
+    <h1 class="sa-page-product-title {{ size }} font-heading text-t-primary">{{ product.name }}</h1>
+    {% if product.status_color or product.status_text %}
+      <div class="flex items-center gap-2.5 shrink-0 status" data-color="{{ product.status_color }}" data-label="{{ product.status_text }}">
+        <div class="relative size-3 rounded-full" style="background-color: {{ product.status_color }}">
+          <div class="pulsating" style="background-color: {{ product.status_color }}"></div>
+        </div>
+        <span class="text-sm font-semibold" style="color: {{ product.status_color }}">{{ product.status_text }}</span>
+      </div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro metaBadges() %}
+  {% if product.category_id or product.product_badges.page | length > 0 %}
+    <div class="flex items-center gap-2 flex-wrap" data-dsr>
+      {% if product.category_id %}
+        <a href="{{ product.category.url }}" class="inline-flex items-center gap-1.5 border border-theme bg-t-primary/5 text-t-primary text-xs font-medium px-2.5 py-1 rounded-badge hover:border-accent-500/60 transition-colors duration-theme">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+          {{ product.category.name }}
+        </a>
+      {% endif %}
+      {% for productBadge in product.product_badges.page %}
+        <span class="inline-flex items-center gap-1.5 bg-accent-500 text-on-accent text-xs font-semibold px-2.5 py-1 rounded-badge" {% if productBadge.color %}style="background-color: {{ productBadge.color }}"{% endif %}>
+          {% if productBadge.icon %}<i class="{{ productBadge.icon }} fa-fw" aria-hidden="true"></i>{% endif %}
+          {{ productBadge.label }}
+        </span>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro priceStockBar() %}
+  <div class="flex justify-between items-center gap-4 flex-wrap" data-dsr>
+    <div class="flex items-end gap-2">
+      <span class="sa-page-product-price text-2xl font-semibold text-t-primary" x-text="appCurrency.format(totalPrice, '{{ product.currency }}')"></span>
+      <span class="text-sm text-t-muted mb-0.5" x-show="quantity > 1"><span x-text="appCurrency.format(unitPrice, '{{ product.currency }}')"></span> each</span>
+    </div>
+    <div class="text-sm">
+      {% if product.visibility == 'on_hold' %}
+        <span class="text-warning font-medium">{{ 'product.on_hold_short' | t }}</span>
+      {% else %}
+        <div x-show="activeVariant in product.variants">
+          <span x-show="product.variants[activeVariant].stock > 0 || product.variants[activeVariant].stock === -1" class="text-success font-medium">
+            <span x-show="product.variants[activeVariant].stock === -1" class="inline-flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/></svg>
+              {{ 'product.in_stock' | t }}
+            </span>
+            <span x-show="product.variants[activeVariant].stock > 0 && !product.hide_stock_count" x-text="product.variants[activeVariant].stock + ' in stock'"></span>
+            <span x-show="product.variants[activeVariant].stock > 0 && product.hide_stock_count">{{ 'product.in_stock' | t }}</span>
+          </span>
+          <span x-show="product.variants[activeVariant].stock === 0" x-cloak class="text-error font-medium">{{ 'product.out_of_stock' | t }}</span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro liveStatsBlock() %}
+  {% if properties.show_live_stats != false and ('sales' in liveStats or 'views' in liveStats) %}
+    <div class="flex flex-col gap-2 p-4 rounded-card border border-theme bg-surface text-sm text-t-muted mt-4" data-dsr>
+      {% if 'views' in liveStats %}
+        <div class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          <p><span class="font-semibold text-t-primary">{{ liveStats.views }}</span> {{ 'person is' if liveStats.views == 1 else 'people are' }} viewing this product right now.</p>
+        </div>
+      {% endif %}
+      {% if 'sales' in liveStats %}
+        {% set salesCountHoursLabelMap = {'1': 'hour', '6': '6 hours', '12': '12 hours', '24': '24 hours', '168': '7 days', '720': '30 days'} %}
+        <div class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+          <p><span class="font-semibold text-t-primary">{{ liveStats.sales }}</span> {{ 'purchase' if liveStats.sales == 1 else 'purchases' }}{{ '.' if not product.sales_count_hours in salesCountHoursLabelMap else (' in the last ' ~ salesCountHoursLabelMap[product.sales_count_hours] ~ '.') }}</p>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro upsellsBlock() %}
+  {% if properties.show_upsells != false and productUpsells.length > 0 %}
+    <div class="mt-6" data-dsr>
+      <h2 class="text-h4 font-heading text-t-primary mb-3">{{ 'product.commonly_bought_together' | t }}</h2>
+      <div class="flex flex-col gap-3">
+        {% for upsell in productUpsells %}
+          {% render_snippet "product-card-horizontal.njk", product=upsell %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro feedbackList(amount) %}
+  {% if feedbacks | length > 0 %}
+    <div class="flex flex-col gap-3">
+      {% for feedback in feedbacks.slice(0, amount) %}
+        {% render_snippet "feedback-card.njk", feedback=feedback, fb_show_products=false %}
+      {% endfor %}
+    </div>
+    {% if feedbacks | length > amount %}
+      <div class="flex justify-center mt-5">
+        <a href="{{ '/feedback' | shopUrl }}" class="text-sm text-accent-500 hover:underline underline-offset-2">{{ 'feedback.view_all' | t }}</a>
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="p-5 rounded-card border border-theme bg-surface text-t-muted text-sm">
+      {{ 'feedback.none_for_product' | t }}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro buyTrustLine() %}
+  {% if properties.trust_items | length %}
+    <div class="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-t-muted">
+      {% for item in properties.trust_items %}
+        <span class="inline-flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-accent-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          {{ item.text | renderString }}
+        </span>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro contentSections() %}
+  {% set _pContent = properties.content_style if properties.content_style else 'tabs' %}
+  {% set _pFeedbackPlace = properties.feedbacks_placement if properties.feedbacks_placement else 'tab' %}
+  {% set _showReviewsTab = properties.show_feedbacks and _pFeedbackPlace == 'tab' %}
+  {% if _pContent == 'accordion' %}
+    <div class="flex flex-col gap-3" data-dsr>
+      <div x-data="{ open: true }" class="rounded-card border border-theme bg-surface overflow-hidden">
+        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-4 px-5 py-4 text-left font-medium text-t-primary">
+          {{ 'common.description' | t }}
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-t-muted transition-transform duration-theme" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div x-show="open" class="px-5 pb-5 text-t-primary editor">{{ product.description | safe }}</div>
+      </div>
+      {% for productTab in product.product_tabs %}
+        <div x-data="{ open: false }" class="rounded-card border border-theme bg-surface overflow-hidden">
+          <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-4 px-5 py-4 text-left font-medium text-t-primary">
+            {{ productTab.title }}
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-t-muted transition-transform duration-theme" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div x-show="open" x-cloak class="px-5 pb-5 text-t-primary editor">{{ productTab.content | safe }}</div>
+        </div>
+      {% endfor %}
+      {% if _showReviewsTab %}
+        <div x-data="{ open: false }" class="rounded-card border border-theme bg-surface overflow-hidden">
+          <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-4 px-5 py-4 text-left font-medium text-t-primary">
+            {{ 'meta.reviews_title' | t }}
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-t-muted transition-transform duration-theme" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div x-show="open" x-cloak class="px-5 pb-5">{{ feedbackList(properties.feedbacks_amount or 4) }}</div>
+        </div>
+      {% endif %}
+    </div>
+  {% elif _pContent == 'stacked' %}
+    <div class="flex flex-col gap-8" data-dsr>
+      <div>
+        <h2 class="text-h4 font-heading text-t-primary mb-3">{{ 'common.description' | t }}</h2>
+        <div class="text-t-primary editor">{{ product.description | safe }}</div>
+      </div>
+      {% for productTab in product.product_tabs %}
+        <div>
+          <h2 class="text-h4 font-heading text-t-primary mb-3">{{ productTab.title }}</h2>
+          <div class="text-t-primary editor">{{ productTab.content | safe }}</div>
+        </div>
+      {% endfor %}
+      {% if _showReviewsTab %}
+        <div>
+          <h2 class="text-h4 font-heading text-t-primary mb-3">{{ 'meta.reviews_title' | t }}</h2>
+          {{ feedbackList(properties.feedbacks_amount or 4) }}
+        </div>
+      {% endif %}
+    </div>
+  {% else %}
+    <div x-data="{ activeTab: 'description' }">
+      <div class="flex flex-wrap items-center gap-1.5 mb-4 border-b border-theme" data-dsr>
+        <button type="button" @click="activeTab = 'description'" class="px-4 py-2.5 text-sm font-medium -mb-px border-b-2 transition-colors duration-theme" :class="activeTab == 'description' ? 'border-accent-500 text-t-primary' : 'border-transparent text-t-muted hover:text-t-primary'">
+          {{ 'common.description' | t }}
+        </button>
+        {% for productTab in product.product_tabs %}
+          <button type="button" @click="activeTab = '{{ productTab.slug }}'" class="px-4 py-2.5 text-sm font-medium -mb-px border-b-2 transition-colors duration-theme" :class="activeTab == '{{ productTab.slug }}' ? 'border-accent-500 text-t-primary' : 'border-transparent text-t-muted hover:text-t-primary'">
+            {{ productTab.title }}
+          </button>
+        {% endfor %}
+        {% if _showReviewsTab %}
+          <button type="button" @click="activeTab = 'reviews'" class="px-4 py-2.5 text-sm font-medium -mb-px border-b-2 transition-colors duration-theme" :class="activeTab == 'reviews' ? 'border-accent-500 text-t-primary' : 'border-transparent text-t-muted hover:text-t-primary'">
+            {{ 'meta.reviews_title' | t }}
+          </button>
+        {% endif %}
+      </div>
+      <div data-dsr>
+        <template x-if="activeTab == 'description'">
+          <div class="text-t-primary editor">{{ product.description | safe }}</div>
+        </template>
+        {% for productTab in product.product_tabs %}
+          <template x-if="activeTab == '{{ productTab.slug }}'">
+            <div class="text-t-primary editor">{{ productTab.content | safe }}</div>
+          </template>
+        {% endfor %}
+        {% if _showReviewsTab %}
+          <template x-if="activeTab == 'reviews'">
+            <div>{{ feedbackList(properties.feedbacks_amount or 4) }}</div>
+          </template>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro buyBoxInner(showTitle=false) %}
+  {% if showTitle %}
+    <div class="mb-4">{{ titleBlock('text-h3') }}</div>
+  {% endif %}
+  {{ metaBadges() }}
+  <div class="mt-4 pb-4 border-b border-theme">{{ priceStockBar() }}</div>
+  <div class="mt-4">
+    {% render_snippet "product-form.njk", product=product %}
+  </div>
+  {{ buyTrustLine() }}
+{% endmacro %}
+
+<section id="{{ componentId }}" class="component sa-page-product sa-page-product--{{ _pLayout }} py-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    {% if _pLayout == 'spotlight-card' %}
+      <div x-data="productForm">
+        <div class="rounded-card border border-theme bg-surface shadow-card p-card sm:p-6" data-dsr>
+          <div class="mb-5">{{ titleBlock('text-h2') }}</div>
+          <div class="flex flex-col lg:flex-row gap-6">
+            <div class="lg:w-1/2 min-w-0">
+              {% render_snippet "product-gallery.njk", gallery_style=_pGallery %}
+            </div>
+            <div class="lg:w-1/2 min-w-0">
+              {{ metaBadges() }}
+              <div class="mt-4 pb-4 border-b border-theme">{{ priceStockBar() }}</div>
+              <div class="mt-4">
+                {% render_snippet "product-form.njk", product=product %}
+              </div>
+              {{ buyTrustLine() }}
+            </div>
+          </div>
+        </div>
+        {{ liveStatsBlock() }}
+        <div class="mt-8">{{ contentSections() }}</div>
+        {{ upsellsBlock() }}
+      </div>
+    {% elif _pLayout == 'stacked-gallery' %}
+      <div class="flex flex-col lg:flex-row gap-8 items-start" x-data="productForm">
+        <div class="w-full lg:w-3/5 min-w-0">
+          {% render_snippet "product-gallery.njk", gallery_style='stacked' %}
+          <div class="mt-8">{{ contentSections() }}</div>
+        </div>
+        <div class="w-full lg:w-2/5 lg:sticky lg:top-24">
+          <div class="rounded-card border border-theme bg-surface shadow-card p-card" data-dsr>
+            {{ buyBoxInner(true) }}
+          </div>
+          {{ liveStatsBlock() }}
+          {{ upsellsBlock() }}
+        </div>
+      </div>
+    {% else %}
+      <div x-data="productForm">
+        {% if _pTitlePos == 'above' %}
+          <div class="mb-6">{{ titleBlock() }}</div>
+        {% endif %}
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+          <div class="w-full lg:w-3/5 min-w-0">
+            <div data-dsr>
+              {% render_snippet "product-gallery.njk", gallery_style=_pGallery %}
+            </div>
+            <div class="mt-8 hidden lg:block">{{ contentSections() }}</div>
+          </div>
+          <div class="w-full lg:w-2/5 lg:sticky lg:top-24">
+            <div class="rounded-card border border-theme bg-surface shadow-card p-card" data-dsr>
+              {{ buyBoxInner(_pTitlePos == 'in-box') }}
+            </div>
+            {{ liveStatsBlock() }}
+            {{ upsellsBlock() }}
+          </div>
+          <div class="lg:hidden w-full">{{ contentSections() }}</div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if properties.show_feedbacks and _pFeedbackPlace == 'below' %}
+      <div class="mt-12" data-dsr>
+        <h2 class="text-h3 font-heading text-t-primary mb-4">{{ 'meta.reviews_title' | t }}</h2>
+        {{ feedbackList(properties.feedbacks_amount or 4) }}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+
+<script>
+  window.addEventListener('load', () => {
+    if (document.querySelector('.splide.main')) {
+      const arrows = {{ 'true' if product.image_urls | length > 1 else 'false' }};
+
+      window.splideMain = new Splide('.splide.main', {
+        type: 'fade',
+        pagination: false,
+        autoHeight: true,
+        arrows
+      });
+
+      if (document.querySelector('.splide.thumbnails')) {
+        window.splideThumbnails = new Splide('.splide.thumbnails', {
+          rewind: true,
+          fixedWidth: 128,
+          fixedHeight: 72,
+          isNavigation: true,
+          arrows: false,
+          gap: 12,
+          breakpoints: {
+            768: {
+              fixedWidth: 96,
+              fixedHeight: 54,
+            },
+          },
+        });
+
+        window.splideMain.sync(window.splideThumbnails);
+      }
+    }
+
+    if (window.splideMain) {
+      window.splideMain.mount();
+
+      if (window.splideThumbnails) {
+        window.splideThumbnails.mount();
+      }
+    }
+
+    document.querySelectorAll('.splide__slide img').forEach((img) => {
+      img.style.removeProperty('display');
+    });
+  });
+</script>

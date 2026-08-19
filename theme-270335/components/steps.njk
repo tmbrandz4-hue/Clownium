@@ -1,0 +1,61 @@
+{% set _sVariant = properties.variant if properties.variant else 'timeline' %}
+{% set _sCount = properties.items | length %}
+{% set _sShowNumbers = properties.show_numbers !== false %}
+{% set _sCentered = (properties.header_align if properties.header_align else 'center') == 'center' %}
+
+<section id="{{ componentId }}" class="component sa-steps sa-steps--{{ _sVariant }} py-section {{ 'relative' if properties.bg_effect and properties.bg_effect != 'none' }}" data-component-id="{{ componentId }}">
+  {% render_snippet "section-fx.njk", sfx_effect=properties.bg_effect %}
+  <div class="wrap">
+    {% render_snippet "section-header.njk",
+      header_headline=properties.headline,
+      header_title=properties.title,
+      header_subtitle=properties.subtitle,
+      header_align=properties.header_align,
+      header_highlight=properties.title_highlight
+    %}
+
+    {% if _sVariant != 'grid' %}
+      <div class="max-w-2xl {{ 'mx-auto' if _sCentered }} relative">
+        <div class="absolute left-5 top-3 bottom-3 w-px bg-t-primary/10" aria-hidden="true"></div>
+        <ol class="sa-steps-items flex flex-col gap-8">
+          {% for item in properties.items %}
+            <li class="sa-steps-item relative flex items-start gap-4 sm:gap-5" data-dsr>
+              <span class="relative z-[1] size-10 shrink-0 rounded-full border border-theme bg-surface-raised shadow-card flex items-center justify-center text-sm font-semibold text-accent-500">{{ loop.index }}</span>
+              <div class="min-w-0 pt-2">
+                <h3 class="font-medium text-t-primary">{{ item.title }}</h3>
+                {% if item.description %}
+                  <p class="text-sm text-t-muted mt-1">{{ item.description | renderString }}</p>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ol>
+      </div>
+    {% else %}
+      {% set _sColClass = {'2': 'sm:grid-cols-2', '3': 'sm:grid-cols-3', '4': 'sm:grid-cols-2 lg:grid-cols-4', '5': 'sm:grid-cols-2 lg:grid-cols-3', '6': 'sm:grid-cols-2 lg:grid-cols-3'}[_sCount] or 'sm:grid-cols-2 lg:grid-cols-4' %}
+      <div class="sa-steps-items grid grid-cols-1 {{ _sColClass }} gap-x-grid-gap gap-y-10">
+        {% for item in properties.items %}
+          <div class="sa-steps-item" data-dsr>
+            <div class="flex items-center gap-4">
+              {% if _sShowNumbers %}
+                <span class="text-sm font-semibold text-accent-500 tabular-nums select-none" aria-hidden="true">{{ ('0' ~ loop.index) if loop.index < 10 else loop.index }}</span>
+              {% endif %}
+              <span class="h-px flex-1 bg-t-primary/10" aria-hidden="true"></span>
+            </div>
+            <div class="mt-5 flex items-center gap-3">
+              {% if item.icon %}
+                <span class="sa-steps-icon size-9 shrink-0 rounded-input bg-accent-500/10 text-accent-500 flex items-center justify-center">
+                  <i class="{{ item.icon }}" aria-hidden="true"></i>
+                </span>
+              {% endif %}
+              <h3 class="font-medium text-t-primary">{{ item.title }}</h3>
+            </div>
+            {% if item.description %}
+              <p class="text-sm text-t-muted mt-2.5">{{ item.description | renderString }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>

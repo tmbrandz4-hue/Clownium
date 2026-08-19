@@ -1,0 +1,120 @@
+<div class="container component" data-component-id="{{ componentId }}">
+  <section class="py-5-nav">
+
+    <div class="mb-4">
+      <h1 class="fw-bold mb-0" style="font-size:1.75rem">My Account</h1>
+      <small style="color:#9ab0cf">{{ shop_customer.email }}</small>
+    </div>
+
+    <div class="row">
+      <div class="col-12 col-lg-3 mb-4">
+        {% render_snippet "customer-sidebar.njk" %}
+      </div>
+      <div class="col-12 col-lg-9">
+
+        {# Stats #}
+        <div class="row">
+          <div class="col-12 col-md-4 mb-4">
+            <div class="cl-stat-card p-4">
+              <div class="cl-stat-label">Completed Orders</div>
+              <div class="cl-stat-value">{{ shop_customer.total_completed }}</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4 mb-4">
+            <div class="cl-stat-card p-4">
+              <div class="cl-stat-label">Total Spent</div>
+              <div class="cl-stat-value">
+                <span x-text="appCurrency.format({{ shop_customer.total_spent_usd }}, 'USD')">
+                  {{ formatPrice(shop_customer.total_spent_usd, 'USD') }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4 mb-4">
+            <div class="cl-stat-card p-4">
+              <div class="cl-stat-label">Customer Since</div>
+              <div class="cl-stat-value" style="font-size:1rem">{{ shop_customer.created_at | formatDate }}</div>
+            </div>
+          </div>
+        </div>
+
+        {# Latest Order #}
+        <div class="cl-dash-card p-4 mb-4">
+          <h5 class="fw-semibold mb-3">Latest Order</h5>
+          {% if latest_invoice %}
+            <p class="fw-bold mb-1">
+              {% if latest_invoice.items %}
+                {{ latest_invoice.items[0].product.name }}
+                {% if latest_invoice.items[0].variant and latest_invoice.items[0].product.name != latest_invoice.items[0].variant.name %}
+                  ({{ latest_invoice.items[0].variant.name }})
+                {% endif %}
+                {% if latest_invoice.items.length > 1 %}
+                  &amp; {{ latest_invoice.items.length - 1 }} more
+                {% endif %}
+              {% else %}
+                Deleted Product
+              {% endif %}
+            </p>
+            <small style="color:#9ab0cf">
+              Invoice <a href="{{ latest_invoice.url }}" target="_blank" style="color:#3b82f6">#{{ latest_invoice.unique_id }}</a>
+              — {{ latest_invoice.created_at | formatDate }}
+            </small>
+          {% else %}
+            <p style="color:#9ab0cf" class="mb-0">No orders yet.</p>
+          {% endif %}
+        </div>
+
+        {% if shop.customer_balance_enabled %}
+          <div class="cl-dash-card p-4 mb-4">
+            <h5 class="fw-semibold mb-2">Balance</h5>
+            <div class="cl-stat-value">
+              <span x-text="appCurrency.format({{ shop_customer.balance }}, 'USD')">
+                {{ formatPrice(shop_customer.balance, 'USD') }}
+              </span>
+            </div>
+            <a href="{{ '/customer/balance' | shopUrl }}" style="color:#3b82f6;font-size:.875rem">Top Up</a>
+          </div>
+        {% endif %}
+
+        <div class="d-flex justify-content-end">
+          <button type="button" data-bs-toggle="modal" data-bs-target="#customer-delete-modal" class="btn btn-outline-danger btn-sm">
+            <i class="fa fa-trash me-1"></i>Delete Account
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+{# Delete modal #}
+<div class="modal fade" id="customer-delete-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:linear-gradient(180deg,#0b1526 0%,#08101e 100%);border:1px solid rgba(120,180,255,.16);border-radius:18px;color:#e6efff">
+      <div class="modal-header" style="border-bottom:1px solid rgba(120,180,255,.12)">
+        <h5 class="modal-title fw-bold">Delete Account</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-4" style="color:#9ab0cf">This action is permanent and cannot be undone. All your data, order history and balance will be removed.</p>
+        <div class="row g-2">
+          <div class="col-6">
+            <button type="button" data-bs-dismiss="modal" class="w-100 cl-dash-btn-outline">Cancel</button>
+          </div>
+          <div class="col-6">
+            <button type="button" @click="appCustomer.deleteAccount()" class="w-100 btn btn-danger" :disabled="appCustomer.deleteModalLoading">
+              <span x-show="!appCustomer.deleteModalLoading"><i class="fa fa-trash me-1"></i>Delete</span>
+              <span x-show="appCustomer.deleteModalLoading"><i class="fa fa-circle-notch fa-spin"></i></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="components">
+  {% for componentId in components_order %}
+    {% render_component componentId %}
+  {% endfor %}
+</div>

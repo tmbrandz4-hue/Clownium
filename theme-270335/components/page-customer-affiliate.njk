@@ -1,0 +1,306 @@
+<section id="{{ componentId }}" class="component sa-page-customer-affiliate py-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    <div class="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8 items-start">
+      {% render_snippet "customer-sidebar.njk" %}
+
+      <div class="min-w-0">
+        {% render_snippet "customer-header.njk",
+          ch_title=properties.title,
+          ch_subtitle=properties.subtitle
+        %}
+
+        {% if shop_customer.affiliate_code %}
+          {% if affiliate_suspended %}
+            <div class="sa-page-customer-affiliate-suspended rounded-card border border-theme bg-surface shadow-card p-6 sm:p-10 mb-4">
+              <div class="flex flex-col items-center text-center max-w-xl mx-auto">
+                <span class="size-12 rounded-input border border-error/25 bg-error/10 text-error flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <h2 class="text-lg font-semibold text-t-primary mt-4">{{ 'affiliate.suspended_title' | t }}</h2>
+                <p class="text-sm text-t-muted mt-2">Your affiliate access has been suspended by the store. Your link no longer earns commission. Contact the store if you think this is a mistake.</p>
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="sa-page-customer-affiliate-items grid gap-grid-gap md:grid-cols-2 items-stretch">
+            {% if not affiliate_suspended %}
+            <div class="rounded-card border border-theme bg-surface shadow-card p-5">
+              <h2 class="text-sm font-medium text-t-primary">{{ 'affiliate.your_link' | t }}</h2>
+              <p class="text-sm text-t-muted mt-1">{{ 'affiliate.share_hint_short' | t }}</p>
+              <div class="flex items-center gap-2 mt-4">
+                <button
+                  type="button"
+                  x-data="{
+                    copied: false,
+                    copy() {
+                      navigator.clipboard.writeText('{{ shop.url }}/?a={{ shop_customer.affiliate_code }}').then(() => {
+                        this.copied = true;
+                        setTimeout(() => { this.copied = false; }, 2000);
+                      });
+                    }
+                  }"
+                  @click="copy()"
+                  :title="copied ? '{{ 'common.copied' | t | jsEscape }}' : '{{ 'common.click_to_copy' | t | jsEscape }}'"
+                  class="group flex items-center justify-between gap-2 min-w-0 flex-1 h-9 px-3 rounded-input border border-theme bg-t-primary/[0.02] text-sm text-t-primary text-left hover:border-accent-500/50 transition-colors duration-theme"
+                >
+                  <span class="truncate">{{ shop.url }}/?a={{ shop_customer.affiliate_code }}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0 text-t-muted group-hover:text-accent-500 transition-colors duration-theme" x-show="!copied" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0 text-success" x-show="copied" x-cloak viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </button>
+                {% if shop.settings.affiliate.code_editable %}
+                  <button
+                    type="button"
+                    class="size-9 shrink-0 inline-flex items-center justify-center rounded-input border border-theme text-t-muted hover:text-t-primary hover:bg-t-primary/5 transition-colors duration-theme"
+                    title="{{ 'affiliate.edit_code' | t }}"
+                    @click="appAffiliate.modalEditCodeOpen('{{ shop_customer.affiliate_code }}')"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                  </button>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="rounded-card border border-theme bg-surface shadow-card p-5">
+              <h2 class="text-sm font-medium text-t-primary">Your tier{% if affiliate_tier %}: {{ affiliate_tier.name }}{% endif %}</h2>
+              <p class="text-sm text-t-muted mt-1">You earn a percentage of each purchase made with your link or code.</p>
+              {% if affiliate_tier %}
+                <div class="flex items-center gap-6 mt-4">
+                  <div>
+                    <p class="text-xs text-t-muted">{{ 'common.commission' | t }}</p>
+                    <p class="text-base font-semibold text-t-primary mt-0.5">{{ affiliate_tier.percentage }}%</p>
+                  </div>
+                  {% if affiliate_tier.discount_percentage > 0 %}
+                    <div>
+                      <p class="text-xs text-t-muted">{{ 'affiliate.buyer_discount' | t }}</p>
+                      <p class="text-base font-semibold text-t-primary mt-0.5">{{ affiliate_tier.discount_percentage }}%</p>
+                    </div>
+                  {% endif %}
+                  <div>
+                    <p class="text-xs text-t-muted">{{ 'affiliate.lifetime_earned' | t }}</p>
+                    <p class="text-base font-semibold text-t-primary mt-0.5" x-text="appCurrency.format({{ lifetime_earnings }}, 'USD')">
+                      {{ formatPrice(lifetime_earnings, 'USD') }}
+                    </p>
+                  </div>
+                </div>
+              {% else %}
+                <p class="mt-4 text-sm text-t-muted">{{ 'affiliate.no_tier' | t }}</p>
+              {% endif %}
+            </div>
+            {% endif %}
+
+            {% if shop.settings.affiliate.balance_mode == 'separate' %}
+              <div class="rounded-card border border-accent-500/50 ring-1 ring-accent-500/15 bg-surface shadow-card p-5 md:col-span-2">
+                <div class="flex items-center justify-between gap-3">
+                  <h2 class="text-sm font-medium text-t-primary">{{ 'affiliate.balance' | t }}</h2>
+                  <span class="text-xl font-semibold text-t-primary" x-text="appCurrency.format({{ shop_customer.affiliate_balance }}, 'USD')">
+                    {{ formatPrice(shop_customer.affiliate_balance, 'USD') }}
+                  </span>
+                </div>
+                <p class="text-sm text-t-muted mt-1">Commissions are collected here, separate from your store balance.</p>
+
+                {% if shop.settings.affiliate.transfer_enabled and shop_customer.affiliate_balance > 0 and not affiliate_suspended %}
+                  <div class="mt-4 pt-4 border-t border-theme">
+                    <p class="text-sm font-medium text-t-primary">{{ 'affiliate.transfer_to_store_balance' | t }}</p>
+                    <div class="flex items-center gap-2 mt-2">
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        placeholder="{{ 'affiliate.amount_usd_placeholder' | t }}"
+                        class="input w-40"
+                        x-model="appAffiliate.transferAmount"
+                      >
+                      <button
+                        type="button"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-btn bg-accent-500 text-on-accent hover:enabled:bg-accent-600 transition-colors duration-theme shadow-btn disabled:opacity-50 disabled:pointer-events-none"
+                        @click="appAffiliate.submitTransfer()"
+                        :disabled="appAffiliate.transferLoading"
+                      >
+                        {{ 'common.transfer' | t }}
+                      </button>
+                    </div>
+                    <p class="text-error text-sm mt-2" x-show="appAffiliate.transferError" x-text="appAffiliate.transferError"></p>
+                  </div>
+                {% endif %}
+
+                {% if shop.settings.affiliate.payouts_enabled and not affiliate_suspended %}
+                  <div class="mt-4 pt-4 border-t border-theme">
+                    {% if has_pending_payout %}
+                      <p class="text-sm text-t-muted">
+                        {{ 'affiliate.pending_payout' | t }}
+                      </p>
+                    {% else %}
+                      <button
+                        type="button"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-btn bg-accent-500 text-on-accent hover:bg-accent-600 transition-colors duration-theme shadow-btn"
+                        @click="appAffiliate.modalPayoutOpen()"
+                      >
+                        {{ 'affiliate.request_payout' | t }}
+                      </button>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+
+              {% if payout_requests.length > 0 %}
+                <div class="rounded-card border border-theme bg-surface shadow-card md:col-span-2">
+                  <div class="px-4 sm:px-5 py-3.5 border-b border-theme">
+                    <h2 class="text-sm font-medium text-t-primary">{{ 'affiliate.payout_requests' | t }}</h2>
+                  </div>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-t-primary">
+                      <thead>
+                        <tr class="border-b border-theme">
+                          <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'common.amount' | t }}</th>
+                          <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'meta.status_title' | t }}</th>
+                          <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'common.note' | t }}</th>
+                          <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'affiliate.requested' | t }}</th>
+                          <th scope="col" class="px-4 sm:px-5 py-3"></th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-theme">
+                        {% for payout in payout_requests %}
+                          <tr>
+                            <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap font-medium">
+                              <span x-text="appCurrency.format({{ payout.amount }}, 'USD')">{{ formatPrice(payout.amount, 'USD') }}</span>
+                            </td>
+                            <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap capitalize">{{ payout.status }}</td>
+                            <td class="px-4 sm:px-5 py-3.5">{{ payout.seller_note if payout.seller_note else '—' }}</td>
+                            <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap text-t-muted">{{ payout.created_at | formatDateTime }}</td>
+                            <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap text-right">
+                              {% if payout.status == 'pending' and not affiliate_suspended %}
+                                <button
+                                  type="button"
+                                  class="text-sm font-medium text-t-muted hover:text-error transition-colors duration-theme"
+                                  @click="appAffiliate.cancelPayout({{ payout.id }})"
+                                >
+                                  {{ 'common.cancel' | t }}
+                                </button>
+                              {% endif %}
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              {% endif %}
+
+              {% if affiliate_wallet_transactions.length > 0 %}
+                <div class="rounded-card border border-theme bg-surface shadow-card md:col-span-2">
+                  <div class="px-4 sm:px-5 py-3.5 border-b border-theme">
+                    <h2 class="text-sm font-medium text-t-primary">{{ 'affiliate.balance_history' | t }}</h2>
+                  </div>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-t-primary">
+                      <thead>
+                        <tr class="border-b border-theme">
+                          <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'common.type' | t }}</th>
+                          <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'common.description' | t }}</th>
+                          <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'common.amount' | t }}</th>
+                          <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'common.date' | t }}</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-theme">
+                        {% for transaction in affiliate_wallet_transactions %}
+                          <tr>
+                            <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap capitalize">{{ transaction.type }}</td>
+                            <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap">{{ transaction.description if transaction.description else '—' }}</td>
+                            <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap font-medium">
+                              <span x-text="appCurrency.format({{ transaction.amount }}, 'USD')">{{ formatPrice(transaction.amount, 'USD') }}</span>
+                            </td>
+                            <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap text-t-muted">{{ transaction.created_at | formatDateTime }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              {% endif %}
+            {% else %}
+              <a href="{{ '/customer/balance' | shopUrl }}" class="group flex items-center justify-between gap-2 rounded-card border border-theme bg-surface shadow-card p-4 sm:px-5 transition-colors duration-theme hover:border-accent-500/40">
+                <span class="text-sm font-medium text-t-primary">{{ 'affiliate.commissions_to_store_balance' | t }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-t-muted group-hover:text-accent-500 transition-colors duration-theme" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </a>
+              <a href="{{ '/customer/balance' | shopUrl }}" class="group flex items-center justify-between gap-2 rounded-card border border-theme bg-surface shadow-card p-4 sm:px-5 transition-colors duration-theme hover:border-accent-500/40">
+                <span class="text-sm font-medium text-t-primary">{{ 'affiliate.view_balance_history' | t }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-t-muted group-hover:text-accent-500 transition-colors duration-theme" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </a>
+            {% endif %}
+          </div>
+
+          {% if public_tiers.length > 1 and not affiliate_suspended %}
+            <div class="rounded-card border border-theme bg-surface shadow-card mt-4 p-5">
+              <h2 class="text-sm font-medium text-t-primary">{{ 'affiliate.tiers' | t }}</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+                {% for tier in public_tiers %}
+                  <div class="sa-page-customer-affiliate-item rounded-input border p-3 {{ 'border-accent-500/50 ring-1 ring-accent-500/15' if affiliate_tier and tier.name == affiliate_tier.name else 'border-theme' }}">
+                    <p class="text-sm font-medium text-t-primary">{{ tier.name }}</p>
+                    <p class="text-xs text-t-muted mt-1">{{ tier.percentage }}% commission{% if tier.discount_percentage > 0 %} · {{ tier.discount_percentage }}% buyer discount{% endif %}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="rounded-card border border-theme bg-surface shadow-card mt-4">
+            <div class="px-4 sm:px-5 py-3.5 border-b border-theme">
+              <h2 class="text-sm font-medium text-t-primary">{{ 'affiliate.referred_users' | t }}</h2>
+            </div>
+            {% if referred_customers.length > 0 %}
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-t-primary">
+                  <thead>
+                    <tr class="border-b border-theme">
+                      <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'login.email' | t }}</th>
+                      <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'common.date' | t }}</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-theme">
+                    {% for customer in referred_customers %}
+                      <tr>
+                        <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap">{{ customer.email }}</td>
+                        <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap text-t-muted">{{ customer.created_at | formatDateTime }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="text-sm text-t-muted p-4 sm:p-5">{{ 'affiliate.no_referrals' | t }}</p>
+            {% endif %}
+            {% if referred_customers_paginator.last_page > 1 %}
+              <div class="px-4 sm:px-5 pb-4">
+                {% render_snippet "pagination.njk", paginator=referred_customers_paginator %}
+              </div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="rounded-card border border-theme bg-surface shadow-card p-10 text-center">
+            <span class="size-10 rounded-input bg-t-primary/5 text-t-muted inline-flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <p class="font-medium text-t-primary mt-3">{{ 'affiliate.no_code' | t }}</p>
+            <p class="text-sm text-t-muted mt-1">{{ 'affiliate.contact_to_enroll' | t }}</p>
+            {% if public_tiers.length > 0 %}
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-6 text-left">
+                {% for tier in public_tiers %}
+                  <div class="sa-page-customer-affiliate-item rounded-input border border-theme p-3">
+                    <p class="text-sm font-medium text-t-primary">{{ tier.name }}</p>
+                    <p class="text-xs text-t-muted mt-1">{{ tier.percentage }}% commission{% if tier.discount_percentage > 0 %} · {{ tier.discount_percentage }}% buyer discount{% endif %}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% render_snippet "affiliate-edit-code-modal.njk" %}
+
+{% if shop.settings.affiliate.balance_mode == 'separate' and shop.settings.affiliate.payouts_enabled %}
+  {% render_snippet "affiliate-payout-modal.njk" %}
+{% endif %}

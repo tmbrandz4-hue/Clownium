@@ -1,0 +1,23 @@
+{#
+  Customer page header.
+  Args: ch_title, ch_subtitle, ch_cta_text, ch_cta_link (all optional).
+#}
+{% if ch_title or ch_subtitle or ch_cta_text %}
+  {% set _chHl = global.properties.title_highlight if global.properties.title_highlight else 'accent' %}
+  <div class="sa-customer-header flex flex-wrap items-end justify-between gap-x-4 gap-y-3 mb-6">
+    <div class="min-w-0">
+      {% if ch_title %}
+        <h1 class="sa-customer-header-title text-h3 font-heading text-t-primary {% if _chHl != 'none' %}hl-{{ _chHl }}{% endif %}">{{ ch_title | renderString | markup }}</h1>
+      {% endif %}
+      {% if ch_subtitle %}
+        <p class="sa-customer-header-subtitle text-sm text-t-muted mt-1">{{ ch_subtitle | renderString }}</p>
+      {% endif %}
+    </div>
+    {% if ch_cta_text %}
+      <a href="{{ (ch_cta_link if ch_cta_link else '/products') | renderString | shopUrl }}" class="sa-customer-header-link inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-btn bg-accent-500 text-on-accent hover:bg-accent-600 transition-colors duration-theme shadow-btn">
+        {{ ch_cta_text | renderString }}
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    {% endif %}
+  </div>
+{% endif %}

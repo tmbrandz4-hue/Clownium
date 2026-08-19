@@ -1,0 +1,71 @@
+{% set _mgVariant = properties.variant if properties.variant else 'grid' %}
+{% set _mgColumns = properties.columns if properties.columns else 3 %}
+{% set _mgColClass = {'2': 'sm:grid-cols-2', '3': 'sm:grid-cols-2 lg:grid-cols-3', '4': 'sm:grid-cols-2 lg:grid-cols-4'}[_mgColumns] or 'sm:grid-cols-2 lg:grid-cols-3' %}
+{% set _mgAspect = properties.aspect_ratio if properties.aspect_ratio else '16/9' %}
+
+{% macro mediaItem(item, useAspect=true) %}
+  {% if item.video_link %}
+    <lite-youtube videoid="{{ item.video_link | ytEmbedVideoId }}" class="w-full rounded-card border border-theme overflow-hidden !max-w-none"></lite-youtube>
+  {% elif item.image %}
+    <img
+      src="{{ item.image | imageUrl }}"
+      alt="{{ item.caption or '' }}"
+      loading="lazy"
+      class="w-full rounded-card border border-theme object-cover zoomable"
+      {% if useAspect %}style="aspect-ratio: {{ properties.aspect_ratio if properties.aspect_ratio else '16/9' }};"{% endif %}
+    />
+  {% endif %}
+  {% if item.caption %}
+    <p class="text-xs text-t-muted mt-2">{{ item.caption }}</p>
+  {% endif %}
+{% endmacro %}
+
+<section id="{{ componentId }}" class="component sa-media-gallery sa-media-gallery--{{ _mgVariant }} py-section {{ 'relative' if properties.bg_effect and properties.bg_effect != 'none' }}" data-component-id="{{ componentId }}">
+  {% render_snippet "section-fx.njk", sfx_effect=properties.bg_effect %}
+  <div class="wrap">
+    {% render_snippet "section-header.njk",
+      header_headline=properties.headline,
+      header_title=properties.title,
+      header_subtitle=properties.subtitle,
+      header_align=properties.header_align,
+      header_highlight=properties.title_highlight
+    %}
+
+    {% if _mgVariant == 'carousel' %}
+      <div
+        class="splide"
+        data-dsr
+        x-data
+        x-init="new Splide($el, {
+          perPage: {{ _mgColumns }},
+          gap: 'var(--grid-gap)',
+          arrows: true,
+          pagination: {{ 'true' if properties.carousel_pagination else 'false' }},
+          autoplay: {{ 'true' if properties.carousel_autoplay else 'false' }},
+          type: {{ "'loop'" if properties.carousel_loop else "'slide'" }},
+          breakpoints: { 1024: { perPage: 2 }, 640: { perPage: 1 } }
+        }).mount()"
+      >
+        <div class="splide__track">
+          <ul class="splide__list">
+            {% for item in properties.items %}
+              <li class="sa-media-gallery-item splide__slide p-1">{{ mediaItem(item) }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% elif _mgVariant == 'masonry' %}
+      <div class="sa-media-gallery-items columns-1 sm:columns-2 lg:columns-3 gap-grid-gap [&>*]:mb-[var(--grid-gap)] [&>*]:break-inside-avoid" data-dsr>
+        {% for item in properties.items %}
+          <div class="sa-media-gallery-item">{{ mediaItem(item, false) }}</div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="sa-media-gallery-items grid grid-cols-1 {{ _mgColClass }} gap-grid-gap">
+        {% for item in properties.items %}
+          <div class="sa-media-gallery-item" data-dsr>{{ mediaItem(item) }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>

@@ -1,0 +1,698 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Shadow presets (selected via --shadow-* in the theme-styles block)  */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --shadow-preset-none: 0 0 rgba(0, 0, 0, 0);
+  --shadow-preset-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.07);
+  --shadow-preset-md: 0 3px 8px rgba(0, 0, 0, 0.08), 0 6px 20px rgba(0, 0, 0, 0.08);
+  --shadow-preset-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 16px 48px rgba(0, 0, 0, 0.14);
+
+  --altcha-border-width: 1px;
+  --altcha-border-radius: var(--radius-input, 8px);
+  --altcha-color-base: transparent;
+  --altcha-color-border: var(--cl-border);
+  --altcha-color-text: rgb(var(--cl-t-primary));
+  --altcha-color-border-focus: currentColor;
+  --altcha-color-error-text: rgb(var(--cl-error));
+  --altcha-color-footer-bg: rgba(var(--cl-t-primary), 0.04);
+  --altcha-max-width: 540px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Layout primitives                                                   */
+/* ------------------------------------------------------------------ */
+
+.wrap {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .wrap {
+    padding-inline: 1.5rem;
+  }
+}
+
+.components > .component + .component {
+  margin-top: var(--section-gap);
+}
+
+[x-cloak] {
+  display: none !important;
+}
+
+/* Scheme toggle: data-scheme lands on <html> pre-paint, so CSS picks the
+   right icon before Alpine initializes: no first-load flicker. Conditions
+   mirror the x-show bindings exactly. */
+
+html:not([data-scheme="dark"]) .st-sun {
+  display: none;
+}
+
+[data-scheme="dark"] .st-moon {
+  display: none;
+}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero backgrounds (background_style option)                          */
+/* ------------------------------------------------------------------ */
+
+.hero-bg-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(var(--cl-t-primary), 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--cl-t-primary), 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 68% 62% at 50% 30%, #000 25%, transparent 74%);
+  mask-image: radial-gradient(ellipse 68% 62% at 50% 30%, #000 25%, transparent 74%);
+}
+
+.hero-bg-glow {
+  position: absolute;
+  top: -14rem;
+  left: 50%;
+  width: 44rem;
+  height: 32rem;
+  margin-left: -22rem;
+  pointer-events: none;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(var(--cl-accent), 0.28), transparent 65%);
+  filter: blur(90px);
+  animation: hero-glow-drift 18s ease-in-out infinite;
+}
+
+@keyframes hero-glow-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-24px, 18px) scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg-glow {
+    animation: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Page background effects (global background_* options)              */
+/* ------------------------------------------------------------------ */
+
+.page-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Scroll attachment: effects live in page space (full document height) instead of being pinned to the viewport */
+
+.page-fx-scroll {
+  position: absolute;
+}
+
+.page-fx-scroll .pfx-fade-top {
+  -webkit-mask-image: radial-gradient(ellipse 140% 120vh at 50% 0%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse 140% 120vh at 50% 0%, #000 30%, transparent 78%);
+}
+
+.page-fx-scroll .pfx-fade-center {
+  -webkit-mask-image: radial-gradient(ellipse 80% 70vh at 50% 55vh, #000 30%, transparent 76%);
+  mask-image: radial-gradient(ellipse 80% 70vh at 50% 55vh, #000 30%, transparent 76%);
+}
+
+.page-fx-scroll .pfx-glows-ambient::before {
+  top: 55vh;
+}
+
+/* Patterns (shared by the page layer and per-section effects) */
+
+.pfx-pattern {
+  position: absolute;
+  inset: 0;
+}
+
+.pfx-pattern-grid {
+  background-image:
+    linear-gradient(rgba(var(--cl-t-primary), 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--cl-t-primary), 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.pfx-pattern-dots {
+  background-image: radial-gradient(rgba(var(--cl-t-primary), 0.13) 1px, transparent 1.5px);
+  background-size: 26px 26px;
+}
+
+.pfx-fade-top {
+  -webkit-mask-image: radial-gradient(ellipse 100% 64% at 50% 0%, #000 28%, transparent 78%);
+  mask-image: radial-gradient(ellipse 100% 64% at 50% 0%, #000 28%, transparent 78%);
+}
+
+.pfx-fade-center {
+  -webkit-mask-image: radial-gradient(ellipse 66% 58% at 50% 42%, #000 28%, transparent 76%);
+  mask-image: radial-gradient(ellipse 66% 58% at 50% 42%, #000 28%, transparent 76%);
+}
+
+/* Glows */
+
+.pfx-glows {
+  position: absolute;
+  inset: 0;
+}
+
+.pfx-glows::before,
+.pfx-glows-corners::after {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(var(--cl-accent), var(--pfx-glow-a, 0.1)), transparent 65%);
+  filter: blur(90px);
+  animation: hero-glow-drift 22s ease-in-out infinite;
+}
+
+.pfx-gs-soft { --pfx-glow-a: 0.1; }
+.pfx-gs-medium { --pfx-glow-a: 0.18; }
+.pfx-gs-strong { --pfx-glow-a: 0.28; }
+
+.pfx-glows-top::before {
+  top: -16rem;
+  left: 50%;
+  width: 54rem;
+  height: 36rem;
+  margin-left: -27rem;
+}
+
+.pfx-glows-corners::before {
+  top: -14rem;
+  left: -16rem;
+  width: 46rem;
+  height: 38rem;
+}
+
+.pfx-glows-corners::after {
+  right: -16rem;
+  bottom: -14rem;
+  width: 46rem;
+  height: 38rem;
+  animation-delay: -11s;
+}
+
+.pfx-glows-ambient::before {
+  top: 50%;
+  left: 50%;
+  width: 76rem;
+  height: 56rem;
+  margin: -28rem 0 0 -38rem;
+  filter: blur(120px);
+}
+
+[data-scheme="light"] .pfx-glows {
+  opacity: 0.75;
+}
+
+/* Per-section background effects (bg_effect option) */
+
+.sfx {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sfx .pfx-pattern {
+  -webkit-mask-image: radial-gradient(ellipse 72% 88% at 50% 42%, #000 30%, transparent 82%);
+  mask-image: radial-gradient(ellipse 72% 88% at 50% 42%, #000 30%, transparent 82%);
+}
+
+/* FAQ accordion collapse */
+
+.faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows calc(var(--dur) * 1.6) ease;
+}
+
+.faq-panel-open {
+  grid-template-rows: 1fr;
+}
+
+.faq-panel-inner {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transition: opacity calc(var(--dur) * 1.6) ease;
+}
+
+.faq-panel-open .faq-panel-inner {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-panel,
+  .faq-panel-inner {
+    transition: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pfx-glows::before,
+  .pfx-glows-corners::after {
+    animation: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Form controls                                                       */
+/* ------------------------------------------------------------------ */
+
+@layer components {
+  .input {
+    @apply block w-full h-9 px-3 text-sm bg-transparent text-t-primary border border-theme rounded-input placeholder:text-t-muted;
+    transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
+  }
+
+  .input:focus,
+  .input:focus-visible {
+    @apply outline-none border-accent-500/70 ring-2 ring-accent-500/15;
+  }
+
+  textarea.input {
+    @apply h-auto min-h-20 py-2;
+  }
+
+  select.input {
+    @apply h-9;
+  }
+
+  .input-stepper {
+    @apply inline-flex items-stretch h-9 border border-theme rounded-input overflow-hidden;
+    transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
+  }
+
+  .input-stepper:focus-within {
+    @apply border-accent-500/70 ring-2 ring-accent-500/15;
+  }
+
+  .input-stepper > button {
+    @apply w-9 shrink-0 flex items-center justify-center text-t-muted hover:text-t-primary hover:bg-t-primary/5 transition-colors duration-theme disabled:opacity-40 disabled:pointer-events-none;
+  }
+
+  .input-stepper > input,
+  .input-stepper > span {
+    @apply bg-transparent text-center text-sm text-t-primary focus:outline-none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Hover effects (hfx-*) — selected via settings, pure CSS             */
+/* ------------------------------------------------------------------ */
+
+.hfx-lift {
+  transition: transform var(--dur) ease, box-shadow var(--dur) ease;
+}
+
+.hfx-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+}
+
+.hfx-grow {
+  transition: transform var(--dur) ease;
+}
+
+.hfx-grow:hover {
+  transform: scale(1.02);
+}
+
+.hfx-border {
+  transition: border-color var(--dur) ease;
+}
+
+.hfx-border:hover {
+  border-color: rgba(var(--cl-accent), 0.55);
+}
+
+.hfx-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.hfx-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-130%) skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.13), transparent);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+.hfx-shine:hover::after {
+  transform: translateX(130%) skewX(-18deg);
+}
+
+.hfx-underline {
+  background-image: linear-gradient(rgb(var(--cl-accent)), rgb(var(--cl-accent)));
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  transition: background-size var(--dur) ease;
+}
+
+.hfx-underline:hover {
+  background-size: 100% 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Title highlight styles (.hl-*) — target .mk spans from the markup   */
+/* filter; .hl-side styles the heading itself                          */
+/* ------------------------------------------------------------------ */
+
+.hl-accent .mk {
+  color: rgb(var(--cl-accent));
+}
+
+.hl-underline .mk {
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--cl-accent));
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.16em;
+}
+
+.hl-thick .mk {
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--cl-accent), 0.65);
+  text-decoration-thickness: 0.22em;
+  text-underline-offset: 0.18em;
+  text-decoration-skip-ink: none;
+}
+
+.hl-side {
+  padding-left: 0.55em;
+  border-left: 0.18em solid rgb(var(--cl-accent));
+}
+
+/* ------------------------------------------------------------------ */
+/* Image aspect/fit helpers (glow-compatible variable names)           */
+/* ------------------------------------------------------------------ */
+
+.aspect-product-card-image {
+  aspect-ratio: var(--product-card-image-aspect-ratio);
+}
+
+.aspect-product-page-image {
+  aspect-ratio: var(--product-page-image-aspect-ratio);
+}
+
+.aspect-group-card-image {
+  aspect-ratio: var(--group-card-image-aspect-ratio);
+}
+
+.aspect-blog-card-image {
+  aspect-ratio: var(--blog-card-image-aspect-ratio);
+}
+
+.object-product-image {
+  object-fit: var(--product-image-fit);
+}
+
+.object-group-image {
+  object-fit: var(--group-image-fit);
+}
+
+.pulsating {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 100%;
+  opacity: 0;
+  pointer-events: none;
+  animation: pulsating 1.25s linear infinite;
+}
+
+@keyframes pulsating {
+  0% {
+    opacity: 0.4;
+  }
+
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Rich text (editor) content — product descriptions, blog posts       */
+/* ------------------------------------------------------------------ */
+
+.editor .rtl {
+  direction: rtl;
+}
+
+.editor .e-paragraph {
+  position: relative;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  word-wrap: break-word;
+}
+
+.editor .e-quote {
+  font-size: 1rem;
+  padding-left: 1rem;
+  border-left-color: rgb(var(--cl-accent));
+  border-left-width: 0.25rem;
+  border-left-style: solid;
+}
+
+.editor .e-hr, .editor hr {
+  border-top: 1px solid var(--cl-border);
+  margin: 0.5rem 0;
+}
+
+.editor .e-heading-h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.editor .e-heading-h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.editor .e-heading-h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.editor .e-nested-listitem {
+  list-style-type: none;
+}
+
+.editor .e-list-ol {
+  padding: 0;
+  margin: 0;
+  margin-left: 1rem;
+  list-style-type: decimal;
+}
+
+.editor .e-list-ul {
+  padding: 0;
+  margin: 0;
+  margin-left: 1rem;
+  list-style-type: disc;
+}
+
+.editor .e-list-ul .e-list-ul {
+  list-style-type: circle;
+}
+
+.editor .e-list-ul .e-list-ul .e-list-ul {
+  list-style-type: square;
+}
+
+.editor .e-list-ol .e-list-ol {
+  list-style-type: lower-alpha;
+}
+
+.editor .e-list-ol .e-list-ol .e-list-ol {
+  list-style-type: lower-roman;
+}
+
+.editor .e-listitem {
+  margin: 0.5rem 1rem 0.5rem 1rem;
+}
+
+.editor .e-image img {
+  max-width: 100%;
+  height: auto;
+}
+
+.editor .e-youtube iframe {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16/9;
+}
+
+.editor .e-link {
+  color: rgb(var(--cl-accent));
+  text-decoration: underline;
+}
+
+.editor .e-text-bold {
+  font-weight: bold;
+}
+
+.editor .e-text-code {
+  background-color: rgba(var(--cl-t-primary), 0.08);
+  padding: 0.0625rem 0.25rem;
+  font-family: monospace;
+  font-size: 95%;
+}
+
+.editor .e-text-italic {
+  font-style: italic;
+}
+
+.editor .e-text-strikethrough {
+  text-decoration: line-through;
+}
+
+.editor .e-text-underline {
+  text-decoration: underline;
+}
+
+.editor .e-text-underlineStrikethrough {
+  text-decoration: underline line-through;
+}
+
+.editor .e-code {
+  display: block;
+  background-color: rgba(var(--cl-t-primary), 0.06);
+  border: 1px solid var(--cl-border);
+  padding: 0.5rem;
+  font-family: monospace;
+  border-radius: var(--radius-input);
+}
+
+.editor .e-collapsible {
+  margin: 0.25rem 0 0.25rem 0;
+  background-color: rgba(var(--cl-t-primary), 0.04);
+  border: 1px solid var(--cl-border);
+  border-radius: var(--radius-input);
+}
+
+.editor .e-collapsible-title {
+  display: block;
+  position: relative;
+  padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+  font-weight: 600;
+}
+
+.editor .e-collapsible-title::marker,
+.editor .e-collapsible-title::-webkit-details-marker {
+  display: none;
+}
+
+.editor .e-collapsible-title:before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 0.625rem;
+  transform: translateY(-50%);
+  border: 1px solid transparent;
+  border-left-color: rgb(var(--cl-accent));
+  border-width: 4px 6px 4px 6px;
+}
+
+.editor .e-collapsible[open] > .editor .e-collapsible-title:before {
+  border-left-color: transparent;
+  border-top-color: rgb(var(--cl-accent));
+  border-width: 6px 4px 0 4px;
+}
+
+.editor .e-collapsible-content {
+  padding: 0.5rem;
+  border-top: 1px solid var(--cl-border);
+}
+
+/* ------------------------------------------------------------------ */
+/* Vendor tweaks                                                       */
+/* ------------------------------------------------------------------ */
+
+.splide.thumbnails .splide__slide.is-active {
+  @apply opacity-100;
+}
+
+.splide .splide__arrow {
+  @apply rounded-btn bg-surface-raised border border-theme [&>svg]:size-4 [&>svg]:fill-t-primary;
+}
+
+.splide .splide__pagination__page {
+  @apply bg-t-primary/30;
+}
+
+.splide .splide__pagination__page.is-active {
+  @apply bg-accent-500;
+}
+
+body lite-youtube {
+  @apply max-w-none;
+}
+
+.grecaptcha-badge {
+  visibility: hidden;
+}
+
+/* ------------------------------------------------------------------ */
+/* Builder                                                             */
+/* ------------------------------------------------------------------ */
+
+.builder .component {
+  @apply relative;
+}
+
+.builder .component .builder-toolbar {
+  @apply hidden z-50;
+}
+
+.builder .component:hover .builder-toolbar {
+  @apply block;
+}
+
+.builder .announcement .builder-toolbar .actions button:not(.edit),
+.builder .navbar .builder-toolbar .actions button:not(.edit),
+.builder .footer .builder-toolbar .actions button:not(.edit) {
+  display: none;
+}

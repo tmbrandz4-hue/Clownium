@@ -1,0 +1,454 @@
+<!-- designed by https://theme.mysellauth.com/ -->
+<section class="cta-discord-section component" data-component-id="{{ componentId }}">
+  <div class="cta-discord-container">
+    <div class="cta-card">
+      <svg class="cta-plus-icon cta-plus-top-left" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"></path>
+        <path d="M12 5v14"></path>
+      </svg>
+      <svg class="cta-plus-icon cta-plus-top-right" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"></path>
+        <path d="M12 5v14"></path>
+      </svg>
+      <svg class="cta-plus-icon cta-plus-bottom-left" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"></path>
+        <path d="M12 5v14"></path>
+      </svg>
+      <svg class="cta-plus-icon cta-plus-bottom-right" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"></path>
+        <path d="M12 5v14"></path>
+      </svg>
+      <!-- designed by https://theme.mysellauth.com/ -->
+      <div class="cta-content-wrapper">
+        <div class="cta-text-content pc-reveal-content">
+          {% if properties.title %}
+          <h2 class="cta-main-title">{{ properties.title | renderString }}</h2>
+          {% else %}
+          <h2 class="cta-main-title">Join Our <span class="gradient-text">Discord Community</span></h2>
+          {% endif %}
+          <!-- designed by https://theme.mysellauth.com/ -->
+          {% if properties.subtitle %}
+          <p class="cta-main-subtitle">{{ properties.subtitle | renderString }}</p>
+          {% else %}
+          <p class="cta-main-subtitle">Get instant support, regular updates, and connect with thousands of players in our official Discord server.</p>
+          {% endif %}
+
+          <div class="cta-buttons-wrapper">
+            <a href="{{ properties.discord_link if properties.discord_link else https://discord.gg/2dDR3fg4Ry' }}" class="cta-btn cta-btn-primary">
+              <i class="fab fa-discord"></i>
+              Join Discord
+            </a>
+          </div>
+        </div>
+        <!-- designed by https://theme.mysellauth.com/ -->
+        <div class="cta-discord-wrapper">
+          <div class="discord-widget pc-reveal-content">
+            <div class="discord-widget-header">
+              <div class="discord-server-icon-box">
+                {% if properties.server_image %}
+                  <img src="{{ properties.server_image | imageUrl }}" alt="Server Icon">
+                {% else %}
+                  <div class="discord-server-initials">SM</div>
+                {% endif %}
+                <div class="discord-online-indicator"></div>
+              </div>
+              <div class="discord-header-info">
+                <div class="discord-verified-wrapper">
+                  <h3 class="discord-server-name">{{ properties.server_name if properties.server_name else 'South Menu Official' }}</h3>
+                  <svg class="discord-verified-icon" viewBox="0 0 16 16" width="16" height="16">
+                    <path fill="#ff0000" d="M7.4,11.17,4,8.62,5.07,7.2,7,8.66l3.24-4.82L11.57,5,7.4,11.17Z"></path>
+                  </svg>
+                </div>
+                <div class="discord-stats">
+                  <div class="discord-stat-item">
+                    <span class="discord-dot online"></span>
+                    <span class="discord-stat-count">{{ properties.online_members if properties.online_members else '1,428' }} Online</span>
+                  </div>
+                  <div class="discord-stat-item">
+                    <span class="discord-dot total"></span>
+                    <span class="discord-stat-count">{{ properties.total_members if properties.total_members else '8,642' }} Members</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="discord-widget-body">
+              <div class="discord-presence-list">
+                <div class="discord-presence-item">
+                  <div class="discord-avatar-stack">
+                    <img src="https://i.ibb.co/B5T9h3Jb/discord.jpg" alt="user">
+                    <img src="https://i.ibb.co/Hfgw0pxm/discord-green.png" alt="user">
+                    <img src="https://i.ibb.co/wFMG5qxc/discord-red.png" alt="user">
+                    <div class="discord-avatar-more">+{{ (properties.online_members | int - 3) if properties.online_members else '1,425' }}</div>
+                  </div>
+                </div>
+              </div>
+              <a href="{{ properties.discord_link if properties.discord_link else 'https://discord.gg/2dDR3fg4Ry' }}" class="discord-widget-btn">Accept Invite</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- designed by https://theme.mysellauth.com/ -->
+<style>
+.cta-discord-section {
+  position: relative;
+  padding: 20px;
+  background: #09090b;
+  overflow: hidden;
+}
+
+.cta-discord-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.cta-card {
+  background: rgba(9, 9, 11, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(247, 50, 52, 0.3);
+  position: relative;
+  overflow: visible;
+}
+
+.cta-plus-icon {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  color: #F73234;
+  background: #09090b;
+  z-index: 2;
+}
+
+@media (min-width: 640px) {
+  .cta-plus-icon { width: 22px; height: 22px; }
+}
+
+.cta-plus-top-left { top: -10px; left: -10px; }
+.cta-plus-top-right { top: -10px; right: -10px; }
+.cta-plus-bottom-left { bottom: -10px; left: -10px; }
+.cta-plus-bottom-right { bottom: -10px; right: -10px; }
+
+@media (min-width: 640px) {
+  .cta-plus-top-left { top: -12px; left: -12px; }
+  .cta-plus-top-right { top: -12px; right: -12px; }
+  .cta-plus-bottom-left { bottom: -12px; left: -12px; }
+  .cta-plus-bottom-right { bottom: -12px; right: -12px; }
+}
+
+.cta-content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  padding: 3rem 2.5rem;
+  gap: 2.5rem;
+}
+
+.cta-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cta-main-title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.cta-main-subtitle {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+  max-width: 500px;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #F73234 0%, #950606 50%, #F73234 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cta-buttons-wrapper {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  height: 3rem;
+  padding: 0 1.5rem;
+  text-decoration: none;
+  gap: 0.75rem;
+}
+
+.cta-btn i {
+  font-size: 1.25rem;
+}
+
+.cta-btn-primary {
+  background: linear-gradient(to bottom, #F73234, #d92a2c);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 15px rgba(247, 50, 52, 0.3);
+}
+
+.cta-btn-primary:hover {
+  background: linear-gradient(to bottom, #d92a2c, #b82224);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(247, 50, 52, 0.4);
+}
+
+/* Discord Widget Styles - Glassmorphism & Brand Theme */
+.cta-discord-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.discord-widget {
+  background: rgba(18, 18, 21, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 0 20px rgba(247, 50, 52, 0.05);
+  border: 1px solid rgba(247, 50, 52, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.discord-widget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #F73234, transparent);
+  opacity: 0.5;
+}
+
+.discord-widget-header {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.discord-server-icon-box {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  background: rgba(247, 50, 52, 0.1);
+  border-radius: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid rgba(247, 50, 52, 0.3);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.discord-server-icon-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.discord-server-initials {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #F73234;
+  text-shadow: 0 0 10px rgba(247, 50, 52, 0.3);
+}
+
+.discord-online-indicator {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  background: #23a559;
+  border: 3px solid #18181b;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(35, 165, 89, 0.4);
+}
+
+.discord-header-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.discord-verified-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.discord-server-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.discord-verified-icon {
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px rgba(88, 101, 242, 0.4));
+}
+
+.discord-stats {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.discord-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.discord-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.discord-dot.online { 
+  background: #23a559;
+  box-shadow: 0 0 8px rgba(35, 165, 89, 0.6);
+}
+.discord-dot.total { 
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.discord-stat-count {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+}
+
+.discord-widget-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.discord-presence-list {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.discord-avatar-stack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.discord-avatar-stack img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 3px solid #1e1f22;
+  margin-right: -14px;
+  transition: transform 0.2s ease;
+}
+
+.discord-avatar-stack img:hover {
+  transform: translateY(-4px);
+  z-index: 10;
+}
+
+.discord-avatar-more {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #313338;
+  border: 3px solid #1e1f22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-left: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.discord-widget-btn {
+  background: linear-gradient(135deg, #e22c2e 0%, #792324 100%);
+  color: #ffffff;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.discord-widget-btn:hover {
+  background: linear-gradient(135deg, #792324 0%, #e22c2e 100%);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 968px) {
+  .cta-content-wrapper {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .cta-text-content {
+    align-items: center;
+  }
+  
+  .cta-main-subtitle {
+    max-width: 100%;
+  }
+  
+  .cta-buttons-wrapper {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .cta-discord-section { padding: 16px; }
+  .cta-content-wrapper { padding: 2rem 1rem; }
+  .cta-main-title { font-size: 1.75rem; }
+  .discord-widget { padding: 1.25rem; }
+}
+</style>
+<!-- designed by https://theme.mysellauth.com/ -->

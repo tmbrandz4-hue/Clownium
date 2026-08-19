@@ -1,0 +1,35 @@
+<div class="components">
+  <section class="py-20 faq component" data-component-id="faq" style="padding: 5rem 0 4rem;">
+    <div class="container">
+      <div class="section-title">
+        <h2>Frequently Asked Questions</h2>
+      </div>
+      <div class="section-subtitle">
+        <p>Answers to the most common questions about our products and checkout.</p>
+      </div>
+      <div class="accordion">
+        {% set faqItems = [
+          { 'q': 'How fast do I get my product?', 'a': 'Delivery is instant. The moment your payment is confirmed, you receive your product automatically on the order screen and in your customer dashboard.' },
+          { 'q': 'How do I pay?', 'a': 'We accept the payment methods shown on our checkout page. All payments are processed securely by our payment provider.' },
+          { 'q': 'What happens after I buy?', 'a': 'You will receive your order details immediately after payment. You can also log in to your customer dashboard at any time to view your purchases, invoices and support tickets.' },
+          { 'q': 'Can I get a refund?', 'a': 'Because products are delivered instantly, all sales are final unless the product is defective or fails to work as described. Contact support and we will make it right.' },
+          { 'q': 'How do I get support?', 'a': 'Join our Discord server and open a support ticket, or create a ticket from your customer dashboard. We are available 24/7.' }
+        ] %}
+        {% for item in faqItems %}
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-faq-{{ loop.index }}" aria-expanded="false" aria-controls="collapse-faq-{{ loop.index }}">
+              {{ item.q }}
+            </button>
+          </h2>
+          <div id="collapse-faq-{{ loop.index }}" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <span class="whitespace-pre-line">{{ item.a }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>

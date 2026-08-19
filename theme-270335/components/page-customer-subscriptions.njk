@@ -1,0 +1,168 @@
+{% set statusStyles = {
+  'active': 'bg-success/10 text-success border-success/25',
+  'trialing': 'bg-accent-500/10 text-accent-500 border-accent-500/25',
+  'past_due': 'bg-warning/10 text-warning border-warning/25',
+  'cancelled': 'bg-t-primary/5 text-t-muted border-theme',
+  'expired': 'bg-error/10 text-error border-error/25'
+} %}
+
+<section id="{{ componentId }}" class="component sa-page-customer-subscriptions py-section" data-component-id="{{ componentId }}" x-data="customerSubscriptions">
+  <div class="wrap">
+    <div class="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8 items-start">
+      {% render_snippet "customer-sidebar.njk" %}
+
+      <div class="min-w-0">
+        {% render_snippet "customer-header.njk",
+          ch_title=properties.title,
+          ch_subtitle=properties.subtitle
+        %}
+
+        <div x-cloak x-show="error" class="mb-4 rounded-input border border-error/25 bg-error/10 text-error text-sm px-3 py-2">
+          <span x-text="error"></span>
+        </div>
+
+        {% if subscriptions.length > 0 %}
+          <div class="sa-page-customer-subscriptions-items rounded-card border border-theme bg-surface shadow-card overflow-x-auto">
+            <table class="w-full text-left text-sm text-t-primary">
+              <thead>
+                <tr class="border-b border-theme">
+                  <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'common.product' | t }}</th>
+                  <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'meta.status_title' | t }}</th>
+                  <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'common.billing' | t }}</th>
+                  <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'subscription.renews' | t }}</th>
+                  <th scope="col" class="px-4 sm:px-5 py-3 text-xs font-medium text-t-muted uppercase tracking-wide">{{ 'common.action' | t }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-theme">
+                {% for subscription in subscriptions %}
+                  <tr class="sa-page-customer-subscriptions-item" x-show="!hidden.includes({{ subscription.id }})">
+                    <td class="px-4 sm:px-5 py-3.5">
+                      <span class="font-medium">{{ subscription.product_name or 'Deleted product' }}</span>
+                      {% if subscription.variant_name %}
+                        <span class="text-t-muted">({{ subscription.variant_name }})</span>
+                      {% endif %}
+                    </td>
+                    <td class="px-4 sm:px-5 py-3.5">
+                      <span class="sa-page-customer-subscriptions-badge inline-flex items-center px-2.5 py-1 rounded-badge border text-xs font-medium capitalize {{ statusStyles[subscription.status] or 'bg-t-primary/5 text-t-muted border-theme' }}"
+                            x-text="labels[{{ subscription.id }}] || '{{ subscription.status | replace('_', ' ') }}'">
+                        {{ subscription.status | replace('_', ' ') }}
+                      </span>
+                      {% if subscription.cancel_at_period_end and subscription.status != 'cancelled' and subscription.status != 'expired' %}
+                        <span class="block text-[11px] text-t-muted mt-1" x-show="!uncancelled.includes({{ subscription.id }})">
+                          Ends {{ subscription.current_period_end | formatDateTime }}
+                        </span>
+                      {% endif %}
+                    </td>
+                    <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap">
+                      {{ formatPrice(subscription.recurring_price, subscription.currency) }}
+                      <span class="text-t-muted">{{ subscription.interval_label }}</span>
+                    </td>
+                    <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap text-t-muted">
+                      {% if subscription.current_period_end %}
+                        {{ subscription.current_period_end | formatDateTime }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+                    <td class="px-4 sm:px-5 py-3.5 whitespace-nowrap">
+                      {% if subscription.renewal_url %}
+                        <a href="{{ subscription.renewal_url }}" target="_blank" class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors duration-theme mr-3">
+                          {{ 'subscription.pay_renewal' | t }}
+                        </a>
+                      {% endif %}
+                      {% if subscription.status in ['active', 'trialing', 'past_due'] %}
+                        {% if subscription.cancel_at_period_end %}
+                          {% if subscription.can_uncancel %}
+                            <button type="button" x-on:click="uncancel({{ subscription.id }})" class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors duration-theme" :disabled="busy">
+                              {{ 'common.resume' | t }}
+                            </button>
+                          {% endif %}
+                        {% else %}
+                          <button type="button" x-on:click="cancel({{ subscription.id }})" class="text-sm font-medium text-t-muted hover:text-error transition-colors duration-theme" :disabled="busy">
+                            {{ 'common.cancel' | t }}
+                          </button>
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="rounded-card border border-theme bg-surface shadow-card p-10 text-center">
+            <span class="size-10 rounded-input bg-t-primary/5 text-t-muted inline-flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+            </span>
+            <p class="font-medium text-t-primary mt-3">{{ properties.empty_text | renderString if properties.empty_text else 'No subscriptions yet' }}</p>
+            <p class="text-sm text-t-muted mt-1">{{ 'subscription.empty_hint' | t }}</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('customerSubscriptions', () => ({
+      busy: false,
+      error: null,
+      labels: {},
+      hidden: [],
+      uncancelled: [],
+
+      async request(subscriptionId, action) {
+        if (this.busy) return null;
+        this.busy = true;
+        this.error = null;
+
+        const token = Cookies.get('shop_customer_token');
+
+        try {
+          const response = await fetch(`{{ '/v1/customer-dashboard/subscriptions/' | apiInternalUrl }}` + subscriptionId + '/' + action, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || 'Something went wrong. Please try again.');
+          }
+
+          return data;
+        } catch (error) {
+          this.error = error.message;
+          return null;
+        } finally {
+          this.busy = false;
+        }
+      },
+
+      async cancel(subscriptionId) {
+        if (!confirm('Cancel this subscription? You keep access until the end of the paid period.')) {
+          return;
+        }
+
+        const data = await this.request(subscriptionId, 'cancel');
+
+        if (data) {
+          window.location.reload();
+        }
+      },
+
+      async uncancel(subscriptionId) {
+        const data = await this.request(subscriptionId, 'uncancel');
+
+        if (data) {
+          window.location.reload();
+        }
+      },
+    }));
+  });
+</script>

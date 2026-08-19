@@ -1,0 +1,85 @@
+{% set _catVariant = properties.variant if properties.variant else 'cards' %}
+{% set _catColumns = properties.columns if properties.columns else 4 %}
+{% set _catColClass = {'2': 'sm:grid-cols-2', '3': 'sm:grid-cols-2 lg:grid-cols-3', '4': 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}[_catColumns] or 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' %}
+{% set _catHfx = global.properties.card_hover_effect if global.properties.card_hover_effect else 'lift' %}
+{% set _catHfxClass = ('hfx-' + _catHfx) if _catHfx != 'none' else '' %}
+
+{% macro categoryCard(category) %}
+  {% set _hfxInner = global.properties.card_hover_effect if global.properties.card_hover_effect else 'lift' %}
+  <a href="{{ category.url }}" class="sa-categories-item group block rounded-card border border-theme bg-surface shadow-card overflow-hidden {{ ('hfx-' + _hfxInner) if _hfxInner != 'none' else '' }}" data-dsr>
+    <div class="border-b border-theme">
+      {% if category.image_url %}
+        <img src="{{ category.image_url }}" alt="{{ category.name }}" class="w-full aspect-group-card-image object-group-image" loading="lazy" />
+      {% else %}
+        <div class="flex justify-center items-center bg-accent-500/5 aspect-group-card-image">
+          <span class="flex items-center justify-center size-14 rounded-input bg-accent-500/10 text-accent-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+          </span>
+        </div>
+      {% endif %}
+    </div>
+    <div class="p-4">
+      <div class="flex items-center justify-between gap-3">
+        <h3 class="font-medium text-t-primary truncate">{{ category.name }}</h3>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0 text-t-muted group-hover:text-accent-500 group-hover:translate-x-0.5 transition-all duration-theme" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+      {% if category.description %}
+        <p class="text-sm text-t-muted line-clamp-2 mt-1">{{ category.description }}</p>
+      {% endif %}
+    </div>
+  </a>
+{% endmacro %}
+
+<section id="{{ componentId }}" class="component sa-categories sa-categories--{{ _catVariant }} py-section {{ 'relative' if properties.bg_effect and properties.bg_effect != 'none' }}" data-component-id="{{ componentId }}">
+  {% render_snippet "section-fx.njk", sfx_effect=properties.bg_effect %}
+  <div class="wrap">
+    {% render_snippet "section-header.njk",
+      header_headline=properties.headline,
+      header_title=properties.title,
+      header_subtitle=properties.subtitle,
+      header_align=properties.header_align,
+      header_highlight=properties.title_highlight
+    %}
+
+    {% if _catVariant == 'pills' %}
+      <div class="sa-categories-items flex flex-wrap gap-2.5 {{ 'justify-center' if (properties.header_align if properties.header_align else 'center') == 'center' }}" data-dsr>
+        {% for category in categories %}
+          <a href="{{ category.url }}" class="sa-categories-link inline-flex items-center gap-2 px-4 py-2 rounded-badge border border-theme bg-surface text-sm font-medium text-t-primary hover:border-accent-500/60 hover:text-accent-500 transition-colors duration-theme shadow-btn">
+            {{ category.name }}
+          </a>
+        {% endfor %}
+      </div>
+    {% elif _catVariant == 'carousel' %}
+      <div
+        class="splide"
+        data-dsr
+        x-data
+        x-init="new Splide($el, {
+          perPage: {{ _catColumns }},
+          gap: 'var(--grid-gap)',
+          arrows: {{ 'true' if properties.carousel_arrows != false else 'false' }},
+          pagination: {{ 'true' if properties.carousel_pagination else 'false' }},
+          autoplay: {{ 'true' if properties.carousel_autoplay else 'false' }},
+          type: {{ "'loop'" if properties.carousel_loop else "'slide'" }},
+          breakpoints: { 1024: { perPage: 2 }, 640: { perPage: 1 } }
+        }).mount()"
+      >
+        <div class="splide__track">
+          <ul class="splide__list">
+            {% for category in categories %}
+              <li class="splide__slide p-1">
+                {{ categoryCard(category) }}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% else %}
+      <div class="sa-categories-items grid grid-cols-1 {{ _catColClass }} gap-grid-gap">
+        {% for category in categories %}
+          {{ categoryCard(category) }}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>

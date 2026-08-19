@@ -1,0 +1,7 @@
+{% if announcement.link %}
+  <a href="{{ announcement.link | shopUrl }}" {% if announcement.new_tab %}target="_blank" rel="noopener"{% endif %} class="sa-announcement-item whitespace-nowrap hover:underline underline-offset-2">
+    {{- announcement.text | renderString -}}
+  </a>
+{% else %}
+  <span class="sa-announcement-item whitespace-nowrap">{{ announcement.text | renderString }}</span>
+{% endif %}

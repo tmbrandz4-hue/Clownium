@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="https://myvouch.es/storage/assets/vouches.css"/>
+<script>window.slug = '{{ properties.username }}';</script>
+<script async src="https://myvouch.es/storage/assets/vouches.js"></script>
+
+<section class="py-20 text-block alignment-{{ properties.alignment }} bg-block-{{ properties.background }} component" data-component-id="{{ componentId }}">
+  <div class="container">
+    {% if properties.title %}
+    <div class="section-title">
+      <h2>{{ properties.title | renderString }}</h2>
+    </div>
+    {% endif %}
+    {% if properties.subtitle %}
+    <div class="section-subtitle">
+      <p>{{ properties.subtitle | renderString }}</p>
+    </div>
+    {% endif %}
+    <div class="row">
+      <div id="vouchesContainer"></div>
+    </div>
+  </div>
+</section>

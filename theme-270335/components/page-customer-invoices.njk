@@ -1,0 +1,113 @@
+{% set statusStyles = {
+  'pending': 'bg-warning/10 text-warning border-warning/25',
+  'confirming': 'bg-accent-500/10 text-accent-500 border-accent-500/25',
+  'partially_completed': 'bg-warning/10 text-warning border-warning/25',
+  'completed': 'bg-success/10 text-success border-success/25',
+  'out_of_stock': 'bg-warning/10 text-warning border-warning/25',
+  'refunded': 'bg-t-primary/5 text-t-muted border-theme'
+} %}
+
+<section id="{{ componentId }}" class="component sa-page-customer-invoices py-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    <div class="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8 items-start">
+      {% render_snippet "customer-sidebar.njk" %}
+
+      <div class="min-w-0">
+        {% render_snippet "customer-header.njk",
+          ch_title=properties.title,
+          ch_subtitle=properties.subtitle
+        %}
+
+        {% if reseller_filter %}
+          <div class="sa-page-customer-invoices-filter flex items-center gap-2 flex-wrap mb-4 -mt-2">
+            <span class="text-xs font-medium uppercase tracking-wide text-t-muted">{{ 'products.filters' | t }}</span>
+            <span class="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-badge border border-accent-500/25 bg-accent-500/10 text-xs font-medium text-accent-500">
+              {{ 'reseller.orders' | t }}
+              <a href="{{ '/customer/invoices' | shopUrl }}" class="flex items-center justify-center size-4 rounded-full text-accent-500/70 hover:text-error hover:bg-error/10 transition-colors duration-theme" aria-label="{{ 'products.remove_filter' | t({ filter: ('reseller.orders' | t) }) }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </a>
+            </span>
+          </div>
+        {% endif %}
+        {% if invoices.data.length > 0 %}
+          <div class="sa-page-customer-invoices-items rounded-card border border-theme bg-surface shadow-card divide-y divide-theme">
+            {% for invoice in invoices.data %}
+              {% set statusClass = (statusStyles[invoice.status] if statusStyles[invoice.status] else 'bg-t-primary/5 text-t-muted border-theme') %}
+              <div class="sa-page-customer-invoices-item p-4 sm:p-5">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <a href="{{ invoice.url }}" target="_blank" class="sa-page-customer-invoices-title block font-medium text-t-primary truncate hover:text-accent-500 transition-colors duration-theme">
+                      {% if invoice.items and invoice.items[0] and invoice.items[0].product %}
+                        {% if invoice.items[0].custom_name %}
+                          {{ invoice.items[0].custom_name }}
+                        {% else %}
+                          {{ invoice.items[0].product.name }}
+                          {% if invoice.items[0].variant and invoice.items[0].product.name != invoice.items[0].variant.name %}
+                            ({{ invoice.items[0].variant.name }})
+                          {% endif %}
+                        {% endif %}
+
+                        {% if invoice.items.length > 1 %}
+                          & {{ invoice.items.length - 1 }} more
+                        {% endif %}
+                      {% else %}
+                        {{ 'feedback.deleted_product' | t }}
+                      {% endif %}
+                    </a>
+                    <p class="text-xs text-t-muted mt-1">
+                      <a href="{{ invoice.url }}" target="_blank" class="text-accent-500 hover:text-accent-600 transition-colors duration-theme">#{{ invoice.unique_id }}</a>{% if invoice.is_reseller_order %} <span class="uppercase text-[10px] text-t-muted ml-1">Reseller{% if invoice.reseller_source == 1 %} &middot; API{% elif invoice.reseller_source == 2 %} &middot; Dynamic{% endif %}</span>{% endif %}
+                      · <span class="text-t-primary font-medium">{{ formatPrice(invoice.price, invoice.currency) }}</span> via {{ invoice.gateway_formatted }}
+                      · {{ invoice.created_at | formatDate }}
+                    </p>
+                  </div>
+                  <span class="sa-page-customer-invoices-badge inline-flex items-center px-2.5 py-1 rounded-badge border text-xs font-medium capitalize shrink-0 {{ statusClass }}">
+                    {{ invoice.status | replace('_', ' ') }}
+                  </span>
+                </div>
+                <div class="sa-page-customer-invoices-actions flex flex-wrap items-center gap-2 mt-3">
+                  <a href="{{ invoice.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-btn border border-accent-500/30 bg-accent-500/[0.06] text-accent-500 hover:bg-accent-500/10 transition-colors duration-theme">
+                    {{ 'common.view_invoice' | t }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                  </a>
+                  {% if shop.tickets_enabled %}
+                    {% if invoice.ticket %}
+                      <a href="{{ ('/customer/tickets/' ~ invoice.ticket.id) | shopUrl }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-btn border border-theme text-t-muted hover:text-t-primary hover:bg-t-primary/5 transition-colors duration-theme">
+                        {{ 'ticket.view' | t }}
+                      </a>
+                    {% else %}
+                      <button type="button" x-on:click="appTickets.modalOpen('{{ invoice.unique_id }}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-btn border border-theme text-t-muted hover:text-t-primary hover:bg-t-primary/5 transition-colors duration-theme">
+                        {{ 'ticket.open' | t }}
+                      </button>
+                    {% endif %}
+                  {% endif %}
+                  {% if not invoice.feedback and invoice.is_eligible_for_feedback %}
+                    <a href="{{ invoice.url }}#feedback" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-btn border border-theme text-t-muted hover:text-t-primary hover:bg-t-primary/5 transition-colors duration-theme">
+                      {{ 'feedback.leave' | t }}
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="rounded-card border border-theme bg-surface shadow-card p-10 text-center">
+            <span class="size-10 rounded-input bg-t-primary/5 text-t-muted inline-flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>
+            </span>
+            <p class="font-medium text-t-primary mt-3">{{ properties.empty_text | renderString if properties.empty_text else 'No orders yet' }}</p>
+            <p class="text-sm text-t-muted mt-1">{{ 'customer.orders_empty_hint' | t }}</p>
+            <a href="{{ '/products' | shopUrl }}" class="inline-flex items-center justify-center mt-5 px-4 py-2 text-sm font-medium rounded-btn bg-accent-500 text-on-accent hover:bg-accent-600 transition-colors duration-theme shadow-btn">
+              {{ 'products.browse' | t }}
+            </a>
+          </div>
+        {% endif %}
+
+        {% if invoices.last_page > 1 %}
+          {% render_snippet "pagination.njk", paginator=invoices %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% render_snippet "ticket-create-modal.njk" %}

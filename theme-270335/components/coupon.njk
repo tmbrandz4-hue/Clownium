@@ -1,0 +1,115 @@
+{% set cp = global.components.coupon %}
+{% if cp.enabled and (not cp.homepage_only or templateName == 'shop') %}
+  <div
+    x-data="couponModal"
+    x-cloak
+    x-show="isOpen"
+    class="sa-coupon fixed inset-0 z-50 overflow-y-auto"
+    role="dialog"
+    aria-modal="true"
+    aria-label="{{ 'product.special_offer' | t }}"
+  >
+    <div class="flex items-center justify-center min-h-screen px-4">
+      <div
+        x-show="isOpen"
+        x-transition:enter="transition ease-out duration-theme"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        @click="dismiss()"
+        class="fixed inset-0"
+        style="background-color: var(--cl-overlay);"
+        aria-hidden="true"
+      ></div>
+
+      <div
+        x-show="isOpen"
+        x-transition:enter="transition ease-out duration-200 transform"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-150 transform"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        class="relative w-full max-w-sm rounded-card border border-theme bg-surface shadow-modal p-6 text-center"
+      >
+        <button type="button" @click="dismiss()" class="absolute top-3 right-3 text-t-muted hover:text-t-primary transition-colors duration-theme" aria-label="{{ 'common.close' | t }}">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+
+        {% if cp.show_logo and shop.image_url %}
+          <img src="{{ shop.image_url }}" alt="{{ shop.name }}" class="h-10 w-auto mx-auto mb-4 rounded" />
+        {% endif %}
+
+        {% if cp.headline %}
+          <p class="sa-coupon-eyebrow text-xs font-semibold text-accent-500 mb-1">{{ cp.headline | renderString }}</p>
+        {% endif %}
+        <h3 class="sa-coupon-title text-h3 font-heading text-t-primary">{{ cp.title | renderString }}</h3>
+        {% if cp.description %}
+          <p class="sa-coupon-body text-sm text-t-muted mt-2">{{ cp.description | renderString }}</p>
+        {% endif %}
+
+        {% if cp.coupon_code %}
+          <button
+            type="button"
+            @click="copyCode()"
+            class="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-input border border-dashed border-accent-500/60 bg-accent-500/5 font-mono font-semibold text-t-primary hover:bg-accent-500/10 transition-colors duration-theme"
+          >
+            <span>{{ cp.coupon_code }}</span>
+            <svg x-show="!copied" xmlns="http://www.w3.org/2000/svg" class="size-4 text-t-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <svg x-cloak x-show="copied" xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
+        {% endif %}
+
+        {% if cp.instructions %}
+          <p class="text-xs text-t-muted mt-2">{{ cp.instructions | renderString }}</p>
+        {% endif %}
+
+        <div class="sa-coupon-actions flex flex-col gap-2 mt-5">
+          <a href="{{ (cp.continue_link if cp.continue_link else '/products') | shopUrl }}" class="w-full px-5 py-2.5 rounded-btn bg-accent-500 text-on-accent text-sm font-medium hover:bg-accent-600 transition-colors duration-theme shadow-btn">
+            {{ cp.continue_button_text if cp.continue_button_text else 'Shop now' }}
+          </a>
+          <button type="button" @click="dismiss()" class="w-full px-5 py-2 text-sm text-t-muted hover:text-t-primary transition-colors duration-theme">
+            {{ cp.dismiss_button_text if cp.dismiss_button_text else 'Maybe later' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('couponModal', () => ({
+        isOpen: false,
+        copied: false,
+
+        dismiss() {
+          this.isOpen = false;
+          try {
+            localStorage.setItem('coupon_dismissed_at', String(Date.now()));
+          } catch (e) {}
+        },
+
+        copyCode() {
+          navigator.clipboard?.writeText({{ (cp.coupon_code or '') | json }}).then(() => {
+            this.copied = true;
+            setTimeout(() => { this.copied = false; }, 2000);
+          });
+        },
+
+        init() {
+          const forgetAfterHours = {{ cp.forget_after_hours if cp.forget_after_hours is not none else 24 }};
+          let dismissedAt = null;
+          try { dismissedAt = parseInt(localStorage.getItem('coupon_dismissed_at') || '', 10) || null; } catch (e) {}
+
+          if (dismissedAt && Date.now() - dismissedAt < forgetAfterHours * 3600 * 1000) {
+            return;
+          }
+
+          setTimeout(() => { this.isOpen = true; }, {{ cp.show_after_seconds if cp.show_after_seconds is not none else 5 }} * 1000);
+        },
+      }));
+    });
+  </script>
+{% endif %}

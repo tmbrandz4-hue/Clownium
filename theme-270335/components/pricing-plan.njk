@@ -1,0 +1,114 @@
+<section id="pricing" class="pc-section component" data-component-id="{{ componentId }}">
+  <div class="pc-bg-glows" aria-hidden="true">
+    <div class="pc-glow pc-glow-1"></div>
+    <div class="pc-glow pc-glow-2"></div>
+  </div>
+  <div class="pc-container">
+    <div class="pc-header pc-reveal-content">
+      {% if properties.title %}
+      <div class="pc-title-wrapper">
+        <h2 class="pc-main-title">{{ properties.title | renderString }}</h2>
+      </div>
+      {% endif %}
+      {% if properties.subtitle %}
+      <p class="pc-main-subtitle">{{ properties.subtitle | renderString }}</p>
+      {% endif %}
+    </div>
+    <div class="pc-content pc-reveal-content">
+      <div class="pc-grid">
+        {% for plan in properties.plans %}
+          <div class="pc-card {{ 'pc-card-featured' if plan.is_featured else 'pc-card-side' }}">
+            {% if plan.badge %}
+            <div class="pc-badge">
+              <span class="pc-badge-dot"></span>
+              {{ plan.badge }}
+            </div>
+            {% endif %}
+            <div class="pc-card-inner">
+              <div class="pc-plan-name">{{ plan.name }}</div>
+              <div class="pc-price-row">
+                {% if not plan.is_featured %}<span class="pc-price-glow">{% endif %}
+                <span class="pc-price">{{ plan.price }}</span>
+                {% if not plan.is_featured %}</span>{% endif %}
+                <span class="pc-price-period">{{ plan.period }}</span>
+              </div>
+              {% if plan.description %}
+                <p class="pc-plan-desc">{{ plan.description }}</p>
+              {% endif %}
+              <div class="pc-divider"></div>
+              <ul class="pc-features">
+                {% if plan.features %}
+                  {% for feature in plan.features.split('\n') %}
+                    {% if feature.trim() %}
+                    <li>
+                      <span class="pc-icon-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      </span>
+                      {{ feature.trim() }}
+                    </li>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              </ul>
+              <a href="{{ plan.button_link | shopUrl if plan.button_link.startsWith('/') else plan.button_link }}" class="pc-cta {{ 'pc-cta-primary' if plan.is_featured else 'pc-cta-outline' }}">{{ plan.button_text if plan.button_text else 'Get Started' }}</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+<!-- designed by https://theme.mysellauth.com/ -->
+<style>
+.pc-section{position:relative;padding:4rem 0;overflow:visible;background:#09090b}
+@media(min-width:768px){.pc-section{padding:8rem 0}}
+.pc-bg-glows{position:absolute;inset:-200px;pointer-events:none;z-index:0}
+.pc-glow{position:absolute;border-radius:50%;filter:blur(60px)}
+.pc-glow-1{width:550px;height:380px;top:0;left:-80px;background:radial-gradient(ellipse at center,rgba(247,50,52,.11) 0%,transparent 70%)}
+.pc-glow-2{width:480px;height:480px;bottom:60px;right:-60px;background:radial-gradient(ellipse at center,rgba(247,50,52,.09) 0%,transparent 70%)}
+.pc-container{position:relative;z-index:1;margin:0 auto;width:100%;max-width:80rem;padding:0 1.5rem}
+.pc-header{margin:0 auto 2.5rem;max-width:48rem;position:relative;z-index:2}
+@media(min-width:768px){.pc-header{margin-bottom:3rem}}
+@media(min-width:1024px){.pc-header{margin-bottom:4rem}}
+.pc-title-wrapper{display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;width:100%}
+.pc-main-title{text-align:center;font-size:1.875rem;line-height:1.1;font-weight:800;letter-spacing:-.025em;margin:0;color:#fafafa;white-space:nowrap}
+@media(min-width:640px){.pc-main-title{font-size:2.25rem}}
+@media(min-width:768px){.pc-main-title{font-size:2.75rem}}
+@media(min-width:1024px){.pc-main-title{font-size:3.5rem}}
+.pc-main-subtitle{color:#a1a1aa;text-align:center;font-size:1rem;line-height:1.6;margin:0;padding:0 1rem}
+@media(min-width:640px){.pc-main-subtitle{font-size:1.125rem}}
+@media(min-width:768px){.pc-main-subtitle{font-size:1.25rem;padding:0}}
+.pc-content{position:relative;z-index:1}
+.pc-grid{display:grid;grid-template-columns:1fr;gap:.75rem}
+@media(min-width:768px){.pc-grid{grid-template-columns:1fr 1.12fr 1fr;align-items:stretch}}
+.pc-card{border-radius:1.5rem;border:1px solid rgba(247,50,52,.2);background:rgba(9,9,11,.5);backdrop-filter:blur(8px);overflow:visible;position:relative;box-shadow:0 4px 24px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.04) inset;transition:all .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.pc-card:hover{border-color:rgba(247,50,52,.4);box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 20px rgba(247,50,52,.08),0 1px 0 rgba(255,255,255,.04) inset}
+.pc-card-featured{background:rgba(247,50,52,.05);border-color:rgba(247,50,52,.35);box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 50px rgba(247,50,52,.1),0 1px 0 rgba(255,255,255,.06) inset}
+.pc-card-featured:hover{border-color:rgba(247,50,52,.55);box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 60px rgba(247,50,52,.14),0 1px 0 rgba(255,255,255,.06) inset}
+.pc-price-glow{position:relative;display:inline-block}
+.pc-price-glow::before{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:140%;height:60%;background:radial-gradient(ellipse at center bottom,rgba(247,50,52,.22) 0%,rgba(247,50,52,.06) 50%,transparent 75%);pointer-events:none;filter:blur(12px);border-radius:50%}
+.pc-card-inner{padding:1.75rem;display:flex;flex-direction:column;flex:1}
+.pc-badge{position:absolute;top:0;left:50%;transform:translateX(-50%) translateY(-50%);display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .85rem;background:#09090b;border:1px solid rgba(247,50,52,.4);border-radius:9999px;font-size:.75rem;font-weight:600;color:#F73234;white-space:nowrap;z-index:2}
+.pc-badge-dot{display:inline-block;width:6px;height:6px;border-radius:9999px;background:#F73234;animation:pc-pulse 2s ease-in-out infinite}
+@keyframes pc-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pc-plan-name{font-size:.8125rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#F73234;margin-bottom:.75rem}
+.pc-price-row{display:flex;align-items:baseline;gap:.25rem;margin-bottom:.5rem}
+.pc-price{font-size:2.75rem;font-weight:800;color:#fff;letter-spacing:-.03em;line-height:1}
+.pc-price-period{font-size:.875rem;color:#71717a}
+.pc-plan-desc{font-size:.875rem;color:#71717a;margin:0 0 1.25rem}
+.pc-divider{height:1px;background:rgba(247,50,52,.12);margin-bottom:1.25rem}
+.pc-features{list-style:none;padding:0;margin:0 0 1.75rem;display:flex;flex-direction:column;gap:.65rem;flex:1}
+.pc-features li{display:flex;align-items:center;gap:.6rem;font-size:.875rem;color:#fff}
+.pc-icon-box{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;flex-shrink:0;border-radius:9999px;background:rgba(247,50,52,.08);border:1px solid rgba(247,50,52,.18);color:#F73234}
+.pc-cta{display:block;width:100%;text-align:center;padding:.7rem 1rem;border-radius:9999px;font-size:.875rem;font-weight:600;text-decoration:none;transition:all .2s ease;margin-top:auto}
+.pc-cta-primary{background:linear-gradient(to bottom,#F73234,#c02527);color:#fff;border:none}
+.pc-cta-primary:hover{background:linear-gradient(to bottom,#e02d2f,#a81f21);color:#fff}
+.pc-cta-outline{background:transparent;color:#fafafa;border:1px solid rgba(247,50,52,.4)}
+.pc-cta-outline:hover{background:rgba(247,50,52,.07);border-color:rgba(247,50,52,.6);color:#fafafa}
+@media(max-width:767px){.pc-main-title{font-size:1.5rem}}
+</style>
+<!-- designed by https://theme.mysellauth.com/ -->
+<script>
+(function(){'use strict';if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initPcReveal)}else{initPcReveal()}function initPcReveal(){const section=document.querySelector('.pc-section');if(!section)return;const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-animated');observer.unobserve(entry.target)}})},{threshold:.15,rootMargin:'0px'});observer.observe(section)}})();
+</script>
+<!-- designed by https://theme.mysellauth.com/ -->

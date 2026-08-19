@@ -1,0 +1,667 @@
+<style id="theme-styles">
+  :root {
+    /* Core brand + palette (night blues) */
+    --cl-accent: #3b82f6;                  /* primary electric blue */
+    --cl-accent-rgb: 59,130,246;
+
+    --cl-background-primary: #0b0f14;      /* near-black with blue tint */
+    --cl-background-primary-rgb: 11,15,20;
+
+    --cl-background-secondary: #0d1320;    /* deeper night */
+    --cl-background-secondary-rgb: 13,19,32;
+
+    --cl-border: rgba(166, 195, 255, 0.08);
+    --cl-border-rgb: 166,195,255,0.08;
+
+    --bs-font-sans-serif: 'Poppins', sans-serif;
+    --cl-snow: 234,242,255;                /* light ink for night */
+  }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" id="theme-font">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" rel="stylesheet" integrity="sha256-gS3HxgWFFFqEo0wQoALebu5XlWdYr3gqd4/Tk5wt8Ig=" crossorigin="anonymous" />
+
+<canvas id="globalCanvas" style="
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+  pointer-events: none;
+"></canvas>
+
+<script>
+class ScrollableBackground {
+  constructor() {
+    this.canvas = document.getElementById('globalCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.particles = [];
+    this.gridOpacity = 0.12;
+    this.gridPulse = 0;
+    this.time = 0;
+    this.scrollY = 0;
+
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
+    window.addEventListener('scroll', () => this.handleScroll());
+
+    this.initParticles();
+    this.animate();
+  }
+
+  resizeCanvas() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+    this.canvas.style.height = this.canvas.height + 'px';
+  }
+
+  handleScroll() {
+    this.scrollY = window.scrollY;
+    this.draw();
+  }
+
+  initParticles() {
+    const particleCount = Math.min(28, Math.floor(window.innerWidth / 70));
+
+    for (let i = 0; i < particleCount; i++) {
+      this.particles.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        size: Math.random() * 2 + 1,
+        speedY: Math.random() * 1 + 0.5,
+        speedX: (Math.random() - 0.5) * 0.5,
+        opacity: Math.random() * 0.6 + 0.2,
+        color: Math.random() < 0.7 ? 'rgba(77, 162, 255, ' : 'rgba(31, 106, 255, ',
+        life: Math.random() * Math.PI * 2,
+        lifeSpeed: Math.random() * 0.02 + 0.01
+      });
+    }
+  }
+
+  drawGrid() {
+    const gridSize = 48;
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+
+    this.gridPulse = Math.sin(this.time * 0.001) * 0.05 + this.gridOpacity;
+
+    this.ctx.strokeStyle = `rgba(77, 162, 255, ${this.gridPulse})`;
+    this.ctx.lineWidth = 1;
+    this.ctx.beginPath();
+
+    for (let x = 0; x <= width; x += gridSize) {
+      this.ctx.moveTo(x, 0);
+      this.ctx.lineTo(x, height);
+    }
+
+    for (let y = 0; y <= height; y += gridSize) {
+      this.ctx.moveTo(0, y);
+      this.ctx.lineTo(width, y);
+    }
+
+    this.ctx.stroke();
+
+    this.applyRadialMasks();
+  }
+
+  applyRadialMasks() {
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+
+    this.ctx.globalCompositeOperation = 'destination-out';
+
+    const centerX = width / 2;
+    const centerY = height / 3;
+    const maxRadius = Math.min(width, height) * 0.8;
+
+    const gradient1 = this.ctx.createRadialGradient(
+      centerX, centerY, maxRadius * 0.3,
+      centerX, centerY, maxRadius
+    );
+    gradient1.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    gradient1.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+
+    this.ctx.fillStyle = gradient1;
+    this.ctx.fillRect(0, 0, width, height);
+
+    if (height > window.innerHeight) {
+      const gradient2 = this.ctx.createRadialGradient(
+        centerX, height * 0.7, maxRadius * 0.2,
+        centerX, height * 0.7, maxRadius * 0.6
+      );
+      gradient2.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      gradient2.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
+
+      this.ctx.fillStyle = gradient2;
+      this.ctx.fillRect(0, 0, width, height);
+    }
+
+    this.ctx.globalCompositeOperation = 'source-over';
+  }
+
+  drawBackgroundGradients() {
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+
+    const grad1 = this.ctx.createRadialGradient(
+      width * 0.3, height * 0.15, 0,
+      width * 0.3, height * 0.15, width * 0.6
+    );
+    grad1.addColorStop(0, 'rgba(77, 162, 255, 0.14)');
+    grad1.addColorStop(1, 'rgba(77, 162, 255, 0)');
+
+    this.ctx.fillStyle = grad1;
+    this.ctx.fillRect(0, 0, width, height);
+
+    const grad2 = this.ctx.createRadialGradient(
+      width * 0.7, height * 0.5, 0,
+      width * 0.7, height * 0.5, width * 0.5
+    );
+    grad2.addColorStop(0, 'rgba(31, 106, 255, 0.1)');
+    grad2.addColorStop(1, 'rgba(31, 106, 255, 0)');
+
+    this.ctx.fillStyle = grad2;
+    this.ctx.fillRect(0, 0, width, height);
+
+    if (height > window.innerHeight * 1.5) {
+      const grad3 = this.ctx.createRadialGradient(
+        width * 0.2, height * 0.8, 0,
+        width * 0.2, height * 0.8, width * 0.4
+      );
+      grad3.addColorStop(0, 'rgba(77, 162, 255, 0.08)');
+      grad3.addColorStop(1, 'rgba(77, 162, 255, 0)');
+
+      this.ctx.fillStyle = grad3;
+      this.ctx.fillRect(0, 0, width, height);
+    }
+  }
+
+  updateParticles() {
+    this.particles.forEach(particle => {
+      particle.y -= particle.speedY;
+      particle.x += particle.speedX + Math.sin(particle.life) * 0.5;
+      particle.life += particle.lifeSpeed;
+
+      if (particle.y < -10) {
+        particle.y = this.canvas.height + 10;
+        particle.x = Math.random() * this.canvas.width;
+      }
+
+      if (particle.x < -10) particle.x = this.canvas.width + 10;
+      if (particle.x > this.canvas.width + 10) particle.x = -10;
+    });
+  }
+
+  drawParticles() {
+    this.particles.forEach(particle => {
+      this.ctx.beginPath();
+      this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      this.ctx.fillStyle = particle.color + particle.opacity + ')';
+      this.ctx.shadowBlur = 8;
+      this.ctx.shadowColor = particle.color + '0.8)';
+      this.ctx.fill();
+      this.ctx.shadowBlur = 0;
+    });
+  }
+
+  draw() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.drawBackgroundGradients();
+    this.drawGrid();
+    this.drawParticles();
+  }
+
+  animate() {
+    this.time = performance.now();
+    this.updateParticles();
+    this.draw();
+    requestAnimationFrame(() => this.animate());
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!prefersReducedMotion) {
+    new ScrollableBackground();
+  } else {
+    const canvas = document.getElementById('globalCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+    canvas.style.height = canvas.height + 'px';
+
+    const gridSize = 48;
+    ctx.strokeStyle = 'rgba(77, 162, 255, 0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    for (let x = 0; x <= canvas.width; x += gridSize) {
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+    }
+    for (let y = 0; y <= canvas.height; y += gridSize) {
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+    }
+    ctx.stroke();
+  }
+});
+
+window.addEventListener('resize', () => {
+  const canvas = document.getElementById('globalCanvas');
+  if (canvas) {
+    canvas.width = window.innerWidth;
+    canvas.height = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+    canvas.style.height = canvas.height + 'px';
+  }
+});
+
+const resizeObserver = new ResizeObserver(() => {
+  const canvas = document.getElementById('globalCanvas');
+  if (canvas) {
+    const newHeight = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+    if (canvas.height !== newHeight) {
+      canvas.height = newHeight;
+      canvas.style.height = newHeight + 'px';
+    }
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  resizeObserver.observe(document.body);
+});
+</script>
+
+
+{# =========================
+   product-page.njk — Hyper Night (gallery glow + sticky summary + chic variants)
+   ========================= #}
+
+<div class="product-wrapper component hyper-product" data-component-id="{{ componentId }}">
+  <div class="container">
+
+    <section class="py-5-nav">
+      <div class="container px-4 px-lg-5 my-5">
+        <div class="row gx-4 gx-lg-5 align-items-start hyper-row">
+
+          {# ----------- GALLERY ----------- #}
+          <div class="col-lg-6">
+            <div class="prod-gallery reveal" id="prodGallery">
+              {% if product.image_urls|length > 0 %}
+              <div class="carousel slide" id="productImageCarousel" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                  {% for image in product.image_urls %}
+                  <div class="carousel-item {{ 'active' if loop.first }}">
+                    <div class="frame">
+                      <img src="{{ image }}" alt="{{ product.name }}" />
+                      <span class="halo" aria-hidden="true"></span>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                {% if product.image_urls|length > 1 %}
+                <div class="thumbnails">
+                  {% for image in product.image_urls %}
+                  <button
+                    type="button"
+                    data-bs-target="#productImageCarousel"
+                    data-bs-slide-to="{{ loop.index0 }}"
+                    class="{{ 'active' if loop.first }}"
+                    aria-label="Preview {{ loop.index }}"
+                  >
+                    <img src="{{ image }}" alt="thumb {{ loop.index }}" />
+                  </button>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+              {% elif product.image_url %}
+              <div class="frame">
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" />
+                <span class="halo" aria-hidden="true"></span>
+              </div>
+              {% else %}
+              <div class="frame placeholder">
+                <div
+                  class="product-img-placeholder"
+                  style="color: {{ global.properties.theme_color }};"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 256 256" class="large">
+                    <path fill="currentColor" d="m222.72 67.91l-88-48.18a13.9 13.9 0 0 0-13.44 0l-88 48.18A14 14 0 0 0 26 80.18v95.64a14 14 0 0 0 7.28 12.27l88 48.18a13.92 13.92 0 0 0 13.44 0l88-48.18a14 14 0 0 0 7.28-12.27V80.18a14 14 0 0 0-7.28-12.27Z"/>
+                  </svg>
+                </div>
+              </div>
+              {% endif %}
+
+              {# Tabs under the image #}
+              <div x-data="{ activeTab: 'description' }" class="prod-tabs">
+                {% if product.product_tabs|length > 0 %}
+                <div class="tab-pills">
+                  <button type="button" @click="activeTab = 'description'" :class="{'active': activeTab == 'description'}">Description</button>
+                  {% for productTab in product.product_tabs %}
+                    <button type="button" @click="activeTab = '{{ productTab.slug }}'" :class="{'active': activeTab == '{{ productTab.slug }}'}">{{ productTab.title }}</button>
+                  {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="tab-content">
+                  <template x-if="activeTab == 'description'">
+                    <div class="editor">{{ product.description | safe }}</div>
+                  </template>
+                  {% for productTab in product.product_tabs %}
+                    <template x-if="activeTab == '{{ productTab.slug }}'">
+                      <div class="editor">{{ productTab.content | safe }}</div>
+                    </template>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {# ----------- SUMMARY / VARIANTS ----------- #}
+          <div class="col-lg-6">
+            <div class="prod-summary reveal" x-data="productForm">
+              <div class="title-stack">
+                <h1 class="prod-title">{{ product.name }}</h1>
+                {% if product.status_color or product.status_text %}
+                <div class="status-chip" style="--chip: {{ product.status_color }}">
+                  <span class="dot"></span>
+                  <span class="txt">{{ product.status_text }}</span>
+                </div>
+                {% endif %}
+              </div>
+
+              {% if 'sales' in liveStats or 'views' in liveStats %}
+              <div class="live-stats">
+                {% if 'views' in liveStats %}
+                <div class="stat"><i class="fa-regular fa-eye"></i>
+                  <span><b>{{ liveStats.views }}</b> {{ 'person is' if liveStats.views == 1 else 'people are' }} viewing</span>
+                </div>
+                {% endif %}
+                {% if 'sales' in liveStats %}
+                {% set salesCountHoursLabelMap = {'1':'hour','6':'6 hours','12':'12 hours','24':'24 hours','168':'7 days','720':'30 days'} %}
+                <div class="stat"><i class="fa-solid fa-bag-shopping"></i>
+                  <span><b>{{ liveStats.sales }}</b> {{ 'person has' if liveStats.sales == 1 else 'people have' }} purchased{{ '.' if not product.sales_count_hours in salesCountHoursLabelMap else (' in the last ' ~ salesCountHoursLabelMap[product.sales_count_hours] ~ '.') }}</span>
+                </div>
+                {% endif %}
+              </div>
+              {% endif %}
+
+              {% if product.product_badges.page|length > 0 %}
+              <div class="page-badges">
+                {% for productBadge in product.product_badges.page %}
+                <span class="pill" style="--pill: {{ productBadge.color }}">
+                  {% if productBadge.icon %}<i class="{{ productBadge.icon }}"></i>{% endif %}
+                  {{ productBadge.label }}
+                </span>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              <div class="price-stock">
+                <div class="price-chip">
+                  <i class="fa-solid fa-tag"></i>
+                  <span class="value" x-text="appCurrency.format(totalPrice, '{{ product.currency }}')"></span>
+                </div>
+
+                <div class="stock-area">
+                  {% if product.visibility == 'on_hold' %}
+                    <span class="stock-chip hold">Product On Hold</span>
+                  {% else %}
+                    <div x-show="activeVariant in product.variants">
+                      <span x-show="product.variants[activeVariant].stock > 0 || product.variants[activeVariant].stock === -1" class="stock-chip ok">
+                        <template x-if="product.variants[activeVariant].stock === -1">
+                          <span class="stock-unl"><i class="fa-solid fa-infinity"></i> In Stock</span>
+                        </template>
+                        <template x-if="product.variants[activeVariant].stock > 0 && !product.hide_stock_count">
+                          <span x-text="product.variants[activeVariant].stock + ' In Stock'"></span>
+                        </template>
+                        <template x-if="product.variants[activeVariant].stock > 0 && product.hide_stock_count">
+                          <span>In Stock</span>
+                        </template>
+                      </span>
+                      <span x-show="product.variants[activeVariant].stock === 0" x-cloak class="stock-chip out">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Out of Stock
+                      </span>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="form-shell">
+                {% render_snippet "product-form.njk", product=product %}
+              </div>
+
+              <div class="variants-help-note" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+
+        {% if productUpsells.length > 0 %}
+        <div class="row gx-4 gx-lg-5 mt-5">
+          <div class="col">
+            <div class="section-title">
+              <h2>Commonly Bought Together</h2>
+            </div>
+            <div class="row products">
+              {% set ogProduct = product %}
+              {% for upsell in productUpsells %}
+                {% render_snippet "product-card.njk", product=upsell %}
+              {% endfor %}
+              {% set product = ogProduct %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+</div>
+
+{% if 'latestOrders' in liveStats and liveStats.latestOrders|length > 0 %}
+<link href="https://cdn.jsdelivr.net/npm/flag-icons@7.3.2/css/flag-icons.min.css" rel="stylesheet" integrity="sha256-tyPeBlnZW2qWbAF1hQiCt9qo6SOgOSymvJBum+FrrwI=" crossorigin="anonymous">
+<div x-data="salesNotifications" x-cloak class="notification-container">
+  <div x-show="show" class="notification-popup">
+    <template x-if="order">
+      <div class="notification-content">
+        {% if product.image_urls|length > 0 %}
+          <div class="notification-image-container"><img src="{{ product.image_urls[0] }}" alt="{{ product.name }} image" class="notification-image"></div>
+        {% endif %}
+        <div class="notification-text truncate">
+          <p class="notification-text-primary text-muted">Someone
+            <template x-if="order.country_code">
+              <span>from <i :class="`flag-icon fi fi-${order.country_code.toLowerCase()}`"></i></span>
+            </template>
+            purchased
+          </p>
+          <p class="notification-text-secondary">{{ product.name }}</p>
+          <p class="notification-text-tertiary text-muted"><span x-text="getTimeAgo(order.completed_at)"></span></p>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+  Alpine.data('salesNotifications', () => ({
+    displayTime: 8000, initTimeMin: 2000, initTimeMax: 4000, nextTimeMin: 8000, nextTimeMax: 12000,
+    latestOrders: {{ liveStats.latestOrders | json }}, show: false,
+    get order(){ return this.latestOrders.length > 0 ? this.latestOrders[0] : null; },
+    getRandomInterval(min,max){ return Math.floor(Math.random()*(max-min+1))+min; },
+    getTimeAgo(input){
+      const date = (input instanceof Date) ? input : new Date(input);
+      const f = new Intl.RelativeTimeFormat('en'); const ranges = {years:31536000,weeks:604800,days:86400,hours:3600,minutes:60,seconds:1};
+      const sec = (date.getTime() - Date.now())/1000; for (let k in ranges) if (ranges[k] < Math.abs(sec)) return f.format(Math.round(sec/ranges[k]), k);
+      return 'just now';
+    },
+    showNotification(){
+      if(!this.latestOrders.length) return;
+      this.show = true;
+      setTimeout(()=>{ this.show=false; setTimeout(()=>{ this.latestOrders.shift(); if(this.latestOrders.length){ setTimeout(()=>this.showNotification(), this.getRandomInterval(this.nextTimeMin,this.nextTimeMax)); }}, 500); }, this.displayTime);
+    },
+    init(){ setTimeout(()=>this.showNotification(), this.getRandomInterval(this.initTimeMin,this.initTimeMax)); }
+  }));
+});
+</script>
+{% endif %}
+
+{% if product.image_urls|length > 1 %}
+<script>
+document.querySelectorAll('.thumbnails button').forEach((b)=>b.addEventListener('click',()=>{
+  b.parentNode.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+}));
+</script>
+{% endif %}
+
+<style>
+.hyper-product[data-component-id="{{ componentId }}"]{
+  --accent: #3b82f6;         /* primary blue */
+  --accent-2:#1f6aff;        /* deeper / gradient pair */
+  --ink:#eaf2ff;
+  --muted:#9ab0cf;
+  --stroke: rgba(166,195,255,.14);
+}
+
+.hyper-product[data-component-id="{{ componentId }}"] .hyper-row{ row-gap: 28px; }
+.hyper-product[data-component-id="{{ componentId }}"] .prod-summary{
+  position: sticky; top: clamp(70px, 8vh, 110px);
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00));
+  border:1px solid var(--stroke); border-radius:16px; padding:18px; box-shadow:0 18px 48px rgba(0,10,30,.45);
+}
+
+.hyper-product[data-component-id="{{ componentId }}"] .title-stack{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.hyper-product[data-component-id="{{ componentId }}"] .prod-title{ margin:0; color:#e6efff; font-weight:900; letter-spacing:-.015em; line-height:1.05; font-size: clamp(28px,3.6vw,46px); text-shadow:0 0 10px rgba(33,96,187,.18); }
+.hyper-product[data-component-id="{{ componentId }}"] .status-chip{
+  display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid rgba(120,180,255,.18);
+  background: color-mix(in oklab, var(--chip) 24%, black); color: color-mix(in oklab, var(--chip) 85%, white);
+}
+.hyper-product[data-component-id="{{ componentId }}"] .status-chip .dot{ width:8px; height:8px; border-radius:50%; background: var(--chip); box-shadow: 0 0 12px color-mix(in oklab, var(--chip) 50%, transparent); }
+
+.hyper-product[data-component-id="{{ componentId }}"] .live-stats{ display:grid; gap:6px; margin:10px 0 4px; }
+.hyper-product[data-component-id="{{ componentId }}"] .live-stats .stat{ display:flex; align-items:center; gap:8px; color:var(--muted); }
+.hyper-product[data-component-id="{{ componentId }}"] .live-stats .stat i{ color:var(--accent-2) }
+
+.hyper-product[data-component-id="{{ componentId }}"] .page-badges{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 14px; }
+.hyper-product[data-component-id="{{ componentId }}"] .page-badges .pill{
+  --p: var(--pill, var(--accent));
+  display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-weight:800; color:#0a1224;
+  background:linear-gradient(90deg, color-mix(in oklab, var(--p) 86%, black), var(--p));
+  box-shadow:0 10px 22px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35);
+}
+
+.hyper-product[data-component-id="{{ componentId }}"] .price-stock{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:10px 0 12px; }
+.hyper-product[data-component-id="{{ componentId }}"] .price-chip{
+  display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px;
+  color:#061021; font-weight:900; letter-spacing:.01em;
+  background:linear-gradient(90deg,var(--accent-2),var(--accent));
+  box-shadow:0 14px 30px rgba(77,162,255,.35), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.hyper-product[data-component-id="{{ componentId }}"] .price-chip .value{ font-size:1.15rem; }
+.hyper-product[data-component-id="{{ componentId }}"] .stock-area{ display:flex; align-items:center; gap:8px; }
+.hyper-product[data-component-id="{{ componentId }}"] .stock-chip{
+  display:inline-flex; align-items:center; gap:8px; padding:7px 12px; border-radius:999px; font-weight:800; border:1px solid rgba(120,180,255,.18);
+}
+.hyper-product[data-component-id="{{ componentId }}"] .stock-chip.ok{ color:#031a12; background:linear-gradient(90deg,#10d28a,#00b877) }
+.hyper-product[data-component-id="{{ componentId }}"] .stock-chip.out{ color:#27090e; background:linear-gradient(90deg,#ff5a6c,#e04153) }
+.hyper-product[data-component-id="{{ componentId }}"] .stock-chip.hold{ color:#0d0a25; background:linear-gradient(90deg,#9a7cff,#6f58ff) }
+.hyper-product[data-component-id="{{ componentId }}"] .stock-unl{ display:inline-flex; gap:6px; align-items:center }
+
+.hyper-product[data-component-id="{{ componentId }}"] .form-shell{
+  margin-top:12px; padding:10px; border-radius:14px;
+  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00));
+  border:1px solid var(--stroke);
+}
+.hyper-product[data-component-id="{{ componentId }}"] .form-shell .price-right{ color:#eaf2ff; font-weight:900; opacity:.95; }
+.hyper-product[data-component-id="{{ componentId }}"] .form-shell input[type="radio"]{ accent-color: var(--accent); }
+
+.hyper-product[data-component-id="{{ componentId }}"] .prod-gallery .frame{
+  position:relative; overflow:hidden; border-radius:16px;
+  border:1px solid var(--stroke); background:#070a10;
+  aspect-ratio: 16/9;
+  box-shadow:0 18px 48px rgba(0,10,30,.45);
+  transform: translateZ(0);
+}
+.hyper-product[data-component-id="{{ componentId }}"] .prod-gallery img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  transform: scale(1.02); transition: transform .6s cubic-bezier(.22,1,.36,1), filter .35s;
+  filter: brightness(.98) contrast(1.04);
+}
+.hyper-product[data-component-id="{{ componentId }}"] .prod-gallery .frame:hover img{ transform: scale(1.06); }
+.hyper-product[data-component-id="{{ componentId }}"] .prod-gallery .halo{
+  content:""; position:absolute; right:-18%; bottom:-20%; width:680px; height:680px; border-radius:50%;
+  background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent) 28%, transparent) 0, transparent 60%);
+  filter: blur(50px); opacity:.55; pointer-events:none;
+}
+
+.hyper-product[data-component-id="{{ componentId }}"] .thumbnails{
+  display:flex; gap:10px; overflow:auto; padding:10px 2px 2px; margin-top:10px;
+}
+.hyper-product[data-component-id="{{ componentId }}"] .thumbnails button{
+  border:1px solid var(--stroke); background:#0b0f14; border-radius:10px; padding:0; flex:0 0 96px; aspect-ratio:16/9; overflow:hidden;
+  opacity:.85; transition:opacity .2s,border-color .2s, transform .2s;
+}
+.hyper-product[data-component-id="{{ componentId }}"] .thumbnails button.active,
+.hyper-product[data-component-id="{{ componentId }}"] .thumbnails button:hover{
+  opacity:1; border-color: rgba(77,162,255,.35); transform: translateY(-1px);
+}
+.hyper-product[data-component-id="{{ componentId }}"] .thumbnails img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+.hyper-product[data-component-id="{{ componentId }}"] .prod-tabs{ margin-top:16px; }
+.hyper-product[data-component-id="{{ componentId }}"] .tab-pills{ display:flex; flex-wrap:wrap; gap:10px; }
+.hyper-product[data-component-id="{{ componentId }}"] .tab-pills button{
+  padding:8px 12px; border-radius:999px; border:1px solid var(--stroke); color:#eaf2ff; background:rgba(255,255,255,.02); font-weight:800;
+}
+.hyper-product[data-component-id="{{ componentId }}"] .tab-pills button.active{
+  color:#061021; background:linear-gradient(90deg,var(--accent-2),var(--accent));
+  box-shadow:0 12px 26px rgba(77,162,255,.35), inset 0 1px 0 rgba(255,255,255,.35);
+  border-color:transparent;
+}
+.hyper-product[data-component-id="{{ componentId }}"] .tab-content{
+  margin-top:10px; border:1px solid var(--stroke); border-radius:12px; padding:12px;
+  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)); color:#cddbf5;
+}
+
+.hyper-product[data-component-id="{{ componentId }}"] .reveal{ opacity:0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+.hyper-product[data-component-id="{{ componentId }}"] .reveal.in{ opacity:1; transform:none; }
+
+@media (max-width: 992px){
+  .hyper-product[data-component-id="{{ componentId }}"] .prod-summary{ position:static; }
+}
+</style>
+
+<script>
+(function(){
+  const root = document.querySelector('.hyper-product[data-component-id="{{ componentId }}"]');
+  if(!root) return;
+
+  const rev = root.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    const io = new IntersectionObserver((e)=>e.forEach(x=>{ if(x.isIntersecting){ x.target.classList.add('in'); io.unobserve(x.target); }}),{threshold:.15, rootMargin:'-10px 0px -10px 0px'});
+    rev.forEach(x=>io.observe(x));
+  } else { rev.forEach(x=>x.classList.add('in')); }
+
+  const frame = root.querySelector('.prod-gallery .frame');
+  if(frame){
+    const img = frame.querySelector('img');
+    const onMove = (ev)=>{
+      const r = frame.getBoundingClientRect();
+      const x = (('clientX' in ev ? ev.clientX : ev.touches[0].clientX) - r.left)/r.width - .5;
+      const y = (('clientY' in ev ? ev.clientY : ev.touches[0].clientY) - r.top )/r.height - .5;
+      img.style.transform = `scale(1.07) translate(${x*8}px, ${y*8}px)`;
+    };
+    const onLeave = ()=>{ img.style.transform = 'scale(1.02)'; };
+    frame.addEventListener('mousemove', onMove, {passive:true});
+    frame.addEventListener('mouseleave', onLeave, {passive:true});
+    frame.addEventListener('touchstart', onMove, {passive:true});
+    frame.addEventListener('touchmove', onMove, {passive:true});
+    frame.addEventListener('touchend', onLeave, {passive:true});
+  }
+})();
+</script>

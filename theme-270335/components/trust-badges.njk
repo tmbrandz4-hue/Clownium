@@ -1,0 +1,106 @@
+{% set _tbVariant = properties.variant if properties.variant else 'inline' %}
+
+{% macro paymentIcons(sizeClass='text-2xl') %}
+  {# shop.payment_methods items are objects: { type, name, checkout_name, icon_image_url, ... }
+     Shop-uploaded icon wins, then the platform's processor SVG via staticAsset. #}
+  {% set _imgH = {'text-lg': 'h-4', 'text-xl': 'h-5', 'text-2xl': 'h-6', 'text-3xl': 'h-7'}[sizeClass] or 'h-6' %}
+  {% set _iconMap = {
+    'adyen': 'adyen.svg',
+    'amazonps': 'amazonps.svg',
+    'authorizenet': 'authorizenet.svg',
+    'btc': 'bitcoin.svg',
+    'cashapp': 'cashapp.svg',
+    'customerbalance': 'customerbalance.svg',
+    'eth': 'ethereum.svg',
+    'eth_usdc': 'usdc.svg',
+    'eth_usdt': 'usdt.svg',
+    'lemonsqueezy': 'lemonsqueezy.svg',
+    'ltc': 'litecoin.svg',
+    'mercadopago': 'mercadopago.svg',
+    'misticpay': 'misticpay.svg',
+    'mollie': 'mollie.svg',
+    'monei': 'monei.svg',
+    'nmi': 'nmi.svg',
+    'overpay': 'overpay.svg',
+    'ovgc': 'ovgc.svg',
+    'pandabase': 'pandabase.svg',
+    'paycek': 'bitcoin.svg',
+    'paypal': 'paypal.svg',
+    'paypalff': 'paypalff.svg',
+    'points': 'points.svg',
+    'razorpay': 'razorpay.svg',
+    'revolutbusiness': 'revolutbusiness.svg',
+    'rewarble': 'rewarble.png',
+    'shopify': 'shopify.svg',
+    'skrill': 'skrill.svg',
+    'sol': 'solana.svg',
+    'sol_usdc': 'usdc.svg',
+    'sol_usdt': 'usdt.svg',
+    'square': 'square.svg',
+    'stripe': 'stripe.svg',
+    'sumup': 'sumup.svg',
+    'venmo': 'venmo.svg',
+    'venpayr': 'venpayr.png',
+    'whop': 'whop.svg'
+  } %}
+  <div class="sa-trust-badges-items flex items-center gap-3 flex-wrap text-t-muted {{ sizeClass }}">
+    {% if properties.icons | length %}
+      {% for icon in properties.icons %}
+        <i class="{{ icon.icon }}" title="{{ icon.label }}" aria-label="{{ icon.label }}"></i>
+      {% endfor %}
+    {% elif shop.payment_methods | length %}
+      {% for methodType, methodGroup in shop.payment_methods | groupby('type') %}
+        {% set _method = methodGroup[0] %}
+        {% set _methodLabel = _method.checkout_name if _method.checkout_name else (_method.name if _method.name else methodType) %}
+        {% set _mapped = _iconMap[methodType | string | lower] %}
+        {% set _methodImage = _method.icon_image_url or (_mapped | staticAsset('payment-processor-icons') if _mapped else ('card.svg' | staticAsset('payment-processor-icons'))) %}
+        <img src="{{ _methodImage }}" alt="{{ _methodLabel }}" title="{{ _methodLabel }}" class="{{ _imgH }} w-auto rounded-sm" loading="lazy" />
+      {% endfor %}
+    {% else %}
+      {% for fallback in [['Visa', 'secondary/visa.svg'], ['Mastercard', 'secondary/mastercard.svg'], ['PayPal', 'paypal.svg'], ['Bitcoin', 'bitcoin.svg']] %}
+        <img src="{{ fallback[1] | staticAsset('payment-processor-icons') }}" alt="{{ fallback[0] }}" title="{{ fallback[0] }}" class="{{ _imgH }} w-auto rounded-sm" loading="lazy" />
+      {% endfor %}
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro secureLine() %}
+  <div class="sa-trust-badges-title inline-flex items-center gap-2 text-t-primary font-medium">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5 w-[18px] h-[18px] text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    {{ properties.title if properties.title else 'Secure checkout' }}
+  </div>
+{% endmacro %}
+
+<section id="{{ componentId }}" class="component sa-trust-badges sa-trust-badges--{{ _tbVariant }} {{ 'py-section' if _tbVariant == 'card' else 'py-6' }}" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    {% if _tbVariant == 'card' %}
+      <div class="rounded-card border border-theme bg-surface shadow-card p-card sm:p-8 text-center flex flex-col items-center gap-4" data-dsr>
+        {{ secureLine() }}
+        {{ paymentIcons('text-3xl') }}
+        {% if properties.subtext %}
+          <p class="sa-trust-badges-subtitle text-sm text-t-muted">{{ properties.subtext | renderString }}</p>
+        {% endif %}
+      </div>
+    {% elif _tbVariant == 'split' %}
+      <div class="rounded-card border border-theme bg-surface p-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4" data-dsr>
+        <div class="flex flex-col gap-0.5 text-center sm:text-left">
+          {{ secureLine() }}
+          {% if properties.subtext %}
+            <p class="sa-trust-badges-subtitle text-xs text-t-muted">{{ properties.subtext | renderString }}</p>
+          {% endif %}
+        </div>
+        {{ paymentIcons() }}
+      </div>
+    {% else %}
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 text-sm" data-dsr>
+        {{ secureLine() }}
+        <span class="hidden sm:block w-px h-5 bg-t-primary/10" aria-hidden="true"></span>
+        {{ paymentIcons() }}
+        {% if properties.subtext %}
+          <span class="hidden sm:block w-px h-5 bg-t-primary/10" aria-hidden="true"></span>
+          <p class="sa-trust-badges-subtitle text-xs text-t-muted">{{ properties.subtext | renderString }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</section>

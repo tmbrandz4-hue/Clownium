@@ -1,0 +1,360 @@
+{% set title_to_use = properties.default_title %}
+{% if category and properties.category_title %}
+  {% set title_to_use = properties.category_title %}
+{% endif %}
+
+<div class="container component" data-component-id="{{ componentId }}" id="shop">
+  <section class="py-5-nav" x-data="shopPage">
+    {% if title_to_use %}
+      <div class="section-title">
+        <h1>{{ title_to_use | renderString }}</h1>
+      </div>
+    {% endif %}
+
+    <div class="d-lg-none mb-4">
+      <button
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#filters-modal"
+        class="sf-toggle w-100 d-flex align-items-center justify-content-center gap-2"
+      >
+        <span>Filters</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24"><path fill="currentColor" d="M11 20q-.425 0-.712-.288T10 19v-6L4.2 5.6q-.375-.5-.112-1.05T5 4h14q.65 0 .913.55T19.8 5.6L14 13v6q0 .425-.288.713T13 20z"/></svg>
+      </button>
+    </div>
+
+    <div class="row">
+      <aside class="col-lg-3 d-none d-lg-block mb-4">
+        <div class="shop-filters rounded p-4">
+          <div>
+            <div class="mb-4">
+              <label class="sf-label fw-bold">Categories</label>
+              <div class="d-flex flex-column gap-1">
+                <button
+                  type="button"
+                  @click="category = 0"
+                  class="sf-cat"
+                  :class="{ 'is-active': category === 0 }"
+                >
+                  All Categories
+                </button>
+                {% for cat in categories %}
+                  <button
+                    type="button"
+                    @click="category = {{ cat.id }}"
+                    class="sf-cat"
+                    :class="{ 'is-active': category === {{ cat.id }} }"
+                    style="padding-left: {{ (cat.depth * 12 + 16) }}px"
+                  >
+                    {{ cat.name }}
+                  </button>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="mb-4">
+              <label for="filters-keyword" class="sf-label fw-bold">Keyword</label>
+              <input
+                type="text"
+                id="filters-keyword"
+                x-model="q"
+                placeholder="Search..."
+                class="sf-input"
+              />
+            </div>
+            <div class="mb-4">
+              <label class="sf-label fw-bold">Price Range</label>
+              <div class="row g-2">
+                <div class="col-6">
+                  <div class="position-relative">
+                    <input
+                      type="number"
+                      min="0"
+                      x-model="priceFrom"
+                      placeholder="Min"
+                      class="sf-input pe-5"
+                    />
+                    <span class="sf-symbol">
+                      <span x-text="window.currencySymbols[appCurrency.currency.toLowerCase()]"></span>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="position-relative">
+                    <input
+                      type="number"
+                      min="0"
+                      x-model="priceTo"
+                      placeholder="Max"
+                      class="sf-input pe-5"
+                    />
+                    <span class="sf-symbol">
+                      <span x-text="window.currencySymbols[appCurrency.currency.toLowerCase()]"></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="sf-reset"
+              @click="reset()"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22q-1.875 0-3.512-.712t-2.85-1.925t-1.925-2.85T3 13h2q0 2.925 2.038 4.963T12 20t4.963-2.037T19 13t-2.037-4.962T12 6h-.15l1.55 1.55L12 9L8 5l4-4l1.4 1.45L11.85 4H12q1.875 0 3.513.713t2.85 1.925t1.925 2.85T21 13t-.712 3.513t-1.925 2.85t-2.85 1.925T12 22"/></svg>
+              <span>Reset</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+      <div class="col-lg-9">
+        <div class="row products">
+          {% for item in items %}
+            {% if item.type == 'group' or not item.group_id %}
+              <div class="col-12 col-md-6 col-lg-4 mb-4" x-show="isVisible({{ loop.index0 }})">
+                {% render_snippet "product-card.njk", product=item %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div x-cloak x-show="noResults" class="text-center py-5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="mb-3 text-muted" width="96" height="96" viewBox="0 0 24 24"><path fill="currentColor" d="M11 18q-.425 0-.712-.288T10 17t.288-.712T11 16h2q.425 0 .713.288T14 17t-.288.713T13 18zm-4-5q-.425 0-.712-.288T6 12t.288-.712T7 11h10q.425 0 .713.288T18 12t-.288.713T17 13zM4 8q-.425 0-.712-.288T3 7t.288-.712T4 6h16q.425 0 .713.288T21 7t-.288.713T20 8z"/></svg>
+          <p class="text-muted fs-5">
+            No products found matching your criteria.
+          </p>
+        </div>
+
+        {% if items_paginator.last_page > 1 %}
+          <div class="mt-4">
+            {% render_snippet "pagination.njk", paginator=items_paginator %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <div class="modal fade" id="filters-modal" tabindex="-1" aria-labelledby="filters-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="filters-modal-label">Filters</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="shop-filters p-1">
+            <div class="mb-4">
+              <label class="sf-label fw-bold">Categories</label>
+              <div class="d-flex flex-column gap-1">
+                <button
+                  type="button"
+                  @click="category = 0"
+                  class="sf-cat"
+                  :class="{ 'is-active': category === 0 }"
+                >
+                  All Categories
+                </button>
+                {% for cat in categories %}
+                  <button
+                    type="button"
+                    @click="category = {{ cat.id }}"
+                    class="sf-cat"
+                    :class="{ 'is-active': category === {{ cat.id }} }"
+                    style="padding-left: {{ (cat.depth * 12 + 16) }}px"
+                  >
+                    {{ cat.name }}
+                  </button>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="mb-4">
+              <label for="filters-mobile-keyword" class="sf-label fw-bold">Keyword</label>
+              <input
+                type="text"
+                id="filters-mobile-keyword"
+                x-model="q"
+                placeholder="Search..."
+                class="sf-input"
+              />
+            </div>
+            <div class="mb-4">
+              <label class="sf-label fw-bold">Price Range</label>
+              <div class="row g-2">
+                <div class="col-6">
+                  <div class="position-relative">
+                    <input type="number" min="0" x-model="priceFrom" placeholder="Min" class="sf-input pe-5" />
+                    <span class="sf-symbol">
+                      <span x-text="window.currencySymbols[appCurrency.currency.toLowerCase()]"></span>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="position-relative">
+                    <input type="number" min="0" x-model="priceTo" placeholder="Max" class="sf-input pe-5" />
+                    <span class="sf-symbol">
+                      <span x-text="window.currencySymbols[appCurrency.currency.toLowerCase()]"></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="sf-reset flex-grow-1" @click="reset()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22q-1.875 0-3.512-.712t-2.85-1.925t-1.925-2.85T3 13h2q0 2.925 2.038 4.963T12 20t4.963-2.037T19 13t-2.037-4.962T12 6h-.15l1.55 1.55L12 9L8 5l4-4l1.4 1.45L11.85 4H12q1.875 0 3.513.713t2.85 1.925t1.925 2.85T21 13t-.712 3.513t-1.925 2.85t-2.85 1.925T12 22"/></svg>
+                <span>Reset</span>
+              </button>
+              <button type="button" class="sf-done" data-bs-dismiss="modal">Done</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% for item in items %}
+    {% if item.type == 'group' %}
+      <div class="modal fade" id="group-modal-{{ item.id }}" tabindex="-1" aria-labelledby="group-modal-{{ item.id }}-label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="group-modal-{{ item.id }}-label">
+                {{ item.name }} Products
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="products row">
+                {% for product in item.products %}
+                  <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-4">
+                    {% render_snippet "product-card.njk", product=product %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+  Alpine.data('shopPage', () => ({
+    q: '',
+    category: 0,
+    priceFrom: '',
+    priceTo: '',
+    catalog: [
+      {% for item in items %}{% if item.type == 'group' or not item.group_id %}{ id: {{ item.id }}, name: {{ item.name | json }}, cat: {{ item.category_id or 0 }}, min: {{ item.min_price or 0 }}, max: {{ item.max_price or 0 }} },
+      {% endif %}{% endfor %}
+    ],
+    noResults: false,
+
+    init() {
+      this.$watch('q', () => this.refresh());
+      this.$watch('category', () => this.refresh());
+      this.$watch('priceFrom', () => this.refresh());
+      this.$watch('priceTo', () => this.refresh());
+      this.refresh();
+    },
+
+    refresh() {
+      this.noResults = !this.catalog.some((p, i) => this.isVisible(i));
+    },
+
+    isVisible(idx) {
+      const p = this.catalog[idx];
+      if (!p) return true;
+      const q = (this.q || '').trim().toLowerCase();
+      if (q && !(p.name || '').toLowerCase().includes(q)) return false;
+      if (this.category && p.cat !== this.category) return false;
+      const from = parseFloat(this.priceFrom);
+      const to = parseFloat(this.priceTo);
+      if (!Number.isNaN(from) && from > 0 && p.max < from) return false;
+      if (!Number.isNaN(to) && to > 0 && p.min > to) return false;
+      return true;
+    },
+
+    reset() {
+      this.q = '';
+      this.category = 0;
+      this.priceFrom = '';
+      this.priceTo = '';
+    }
+  }));
+});
+</script>
+
+<style>
+/* =========================
+   Shop filters — dark blue theme
+   ========================= */
+.shop-filters{
+  background: linear-gradient(180deg, #0b0f14, #0d1320);
+  border: 1px solid rgba(160,200,255,.12);
+  border-radius: 18px;
+  box-shadow: 0 16px 42px rgba(0,10,30,.55);
+}
+.sf-label{
+  color: #c7d6f2; font-weight: 800; font-size: .8rem;
+  letter-spacing: .06em; text-transform: uppercase; margin-bottom: .6rem; display: block;
+}
+.sf-cat{
+  display: block; width: 100%; text-align: left; padding: .55rem .8rem;
+  border-radius: 10px; font-weight: 700; font-size: .88rem; color: #c8d8ff;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(160,200,255,.12);
+  transition: transform .15s ease, background .2s ease, border-color .2s ease, color .2s ease;
+}
+.sf-cat:hover{ transform: translateY(-1px); border-color: rgba(120,180,255,.35); color: #fff }
+.sf-cat.is-active{
+  color: #041224; border-color: transparent;
+  background: linear-gradient(90deg,#1d4ed8,#3b82f6);
+  box-shadow: 0 8px 20px rgba(0,90,255,.35);
+}
+.sf-input{
+  width: 100%; padding: .6rem .8rem; border-radius: 10px;
+  background: #070a10; border: 1px solid rgba(160,200,255,.12);
+  color: #eaf2ff; font-weight: 600; outline: 0;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.sf-input::placeholder{ color: #6f8bb8 }
+.sf-input:focus{
+  border-color: rgba(120,180,255,.45);
+  box-shadow: 0 0 0 3px rgba(33,150,243,.2);
+}
+.sf-symbol{
+  position: absolute; top: 50%; right: .75rem; transform: translateY(-50%);
+  color: #6f8bb8; font-size: .8rem; pointer-events: none;
+}
+.sf-reset{
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  width: 100%; padding: .6rem 1rem; border-radius: 12px;
+  font-weight: 800; font-size: .9rem; color: #eaf2ff; text-decoration: none;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(160,200,255,.2);
+  transition: transform .16s ease, background .2s ease, border-color .2s ease;
+}
+.sf-reset svg{ width: 16px; height: 16px }
+.sf-reset:hover{ transform: translateY(-1px); background: rgba(255,255,255,.06); border-color: rgba(120,180,255,.4) }
+.sf-done{
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .6rem 1.4rem; border-radius: 12px;
+  font-weight: 800; font-size: .9rem; color: #041224;
+  background: linear-gradient(90deg,#1d4ed8,#3b82f6); border: 0;
+  box-shadow: 0 10px 26px rgba(0,90,255,.35);
+}
+.sf-done:hover{ transform: translateY(-1px) }
+.sf-toggle{
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .7rem 1.2rem; border-radius: 12px; border: 0;
+  font-weight: 800; color: #041224;
+  background: linear-gradient(90deg,#1d4ed8,#3b82f6);
+  box-shadow: 0 10px 26px rgba(0,90,255,.35);
+}
+.sf-toggle svg{ width: 18px; height: 18px }
+#filters-modal .modal-content{
+  background: #0b0f14; border: 1px solid rgba(160,200,255,.12);
+  border-radius: 18px; color: #eaf2ff;
+}
+#filters-modal .modal-header{ border-bottom: 1px solid rgba(160,200,255,.1) }
+#filters-modal .modal-title{ color: #fff; font-weight: 800 }
+#filters-modal .btn-close{ filter: invert(1) }
+</style>

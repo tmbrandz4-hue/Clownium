@@ -1,0 +1,35 @@
+<section id="{{ componentId }}" class="component sa-page-blog-post py-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    <article class="max-w-3xl mx-auto">
+      <a href="{{ '/blog' | shopUrl }}" class="sa-page-blog-post-link inline-flex items-center gap-2 text-sm text-t-muted hover:text-t-primary transition-colors duration-theme mb-6" data-dsr>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        {{ 'blog.view_all' | t }}
+      </a>
+
+      <p class="text-sm text-t-muted" data-dsr>{{ blogPost.created_at | formatDate }}</p>
+      <h1 class="sa-page-blog-post-title text-h1 font-heading text-t-primary mt-2 text-balance" data-dsr>{{ blogPost.title }}</h1>
+      {% if blogPost.summary %}
+        <p class="sa-page-blog-post-subtitle text-lg text-t-muted mt-3" data-dsr>{{ blogPost.summary }}</p>
+      {% endif %}
+
+      {% if blogPost.image_url %}
+        <img src="{{ blogPost.image_url }}" alt="{{ blogPost.title }}" class="sa-page-blog-post-media w-full rounded-card border border-theme object-cover mt-6" data-dsr />
+      {% endif %}
+
+      <div class="sa-page-blog-post-body editor text-t-primary leading-relaxed mt-8" data-dsr>
+        {{ blogPost.content | safe }}
+      </div>
+    </article>
+
+    {% if related_posts | length %}
+      <div class="max-w-5xl mx-auto mt-16">
+        <h2 class="text-h3 font-heading text-t-primary mb-5">{{ 'blog.more_posts' | t }}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-grid-gap">
+          {% for post in related_posts.slice(0, 3) %}
+            {% render_snippet "blog-post-card.njk", post=post %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>

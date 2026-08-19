@@ -1,0 +1,35 @@
+{#
+  Button group.
+  Args: buttons (list of { text, icon, link, new_tab, color: 'primary'|'secondary', style: 'solid'|'outline'|'ghost' }),
+        buttons_align ('left'|'center'|'right', default 'left'),
+        buttons_size ('sm'|'md'|'lg', default 'md')
+#}
+{% if buttons | length %}
+  {% set _bAlign = buttons_align if buttons_align else 'left' %}
+  {% set _bSize = buttons_size if buttons_size else 'md' %}
+  {% set _hfx = global.properties.button_hover_effect if global.properties.button_hover_effect else 'none' %}
+
+  <div class="sa-buttons flex flex-wrap items-center gap-3 {{ {'center': 'justify-center', 'right': 'justify-end', 'left': 'justify-start'}[_bAlign] }}">
+    {% for button in buttons %}
+      {% set _color = button.color if button.color else 'primary' %}
+      {% set _style = button.style if button.style else 'solid' %}
+      <a
+        href="{{ button.link | shopUrl }}"
+        {% if button.new_tab %}target="_blank" rel="noopener"{% endif %}
+        class="sa-btn sa-btn--{{ _color }} sa-btn--{{ _style }} inline-flex items-center justify-center gap-2 font-medium rounded-btn shadow-btn transition-colors duration-theme
+          {{ {'sm': 'px-4 py-2 text-sm', 'md': 'px-5 py-2.5 text-sm', 'lg': 'px-6 py-3 text-base'}[_bSize] }}
+          {% if _color == 'primary' and _style == 'solid' %}bg-accent-500 text-on-accent hover:bg-accent-600
+          {% elif _color == 'primary' and _style == 'outline' %}border border-theme !border-accent-500/60 text-accent-500 hover:bg-accent-500/10
+          {% elif _color == 'primary' and _style == 'ghost' %}text-accent-500 hover:bg-accent-500/10
+          {% elif _color == 'secondary' and _style == 'solid' %}bg-t-primary/5 border border-theme text-t-primary hover:bg-t-primary/10
+          {% elif _color == 'secondary' and _style == 'outline' %}border border-theme text-t-primary hover:bg-t-primary/5
+          {% else %}text-t-primary hover:bg-t-primary/5
+          {% endif %}
+          {% if _hfx != 'none' %}hfx-{{ _hfx }}{% endif %}"
+      >
+        {% if button.icon %}<i class="{{ button.icon }}" aria-hidden="true"></i>{% endif %}
+        {{ button.text }}
+      </a>
+    {% endfor %}
+  </div>
+{% endif %}

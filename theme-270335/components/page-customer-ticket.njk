@@ -1,0 +1,263 @@
+<section id="{{ componentId }}" class="component sa-page-customer-ticket py-section" data-component-id="{{ componentId }}" x-data="ticket()">
+  <div class="wrap">
+    <div class="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8 items-start">
+      {% render_snippet "customer-sidebar.njk" %}
+
+      <div class="min-w-0">
+        <a href="{{ '/customer/tickets' | shopUrl }}" class="sa-page-customer-ticket-link inline-flex items-center gap-1 text-sm font-medium text-t-muted hover:text-t-primary transition-colors duration-theme mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          {{ 'ticket.all' | t }}
+        </a>
+
+        <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 mb-6">
+          <h1 class="sa-page-customer-ticket-title text-h3 font-heading text-t-primary break-words max-w-xl min-w-0">{{ ticket.subject }}</h1>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-badge border border-theme bg-t-primary/[0.03] text-xs font-medium text-t-muted">
+              Opened {{ ticket.created_at | formatDate }}
+            </span>
+            {% if ticket.invoice %}
+              <a href="{{ ticket.invoice.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-badge border border-theme bg-t-primary/[0.03] text-xs font-medium text-t-muted hover:text-t-primary transition-colors duration-theme">
+                Invoice #{{ ticket.invoice.unique_id }}
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+              </a>
+            {% endif %}
+            <span
+              class="sa-page-customer-ticket-badge inline-flex items-center px-2.5 py-1 rounded-badge border text-xs font-medium"
+              :class="{
+                'bg-warning/10 text-warning border-warning/25': ticket.status === 'pending',
+                'bg-accent-500/10 text-accent-500 border-accent-500/25': ticket.status === 'open',
+                'bg-success/10 text-success border-success/25': ticket.status === 'closed'
+              }"
+            >
+              <template x-if="ticket.status === 'pending'">
+                <span>{{ 'ticket.awaiting_you' | t }}</span>
+              </template>
+              <template x-if="ticket.status === 'open'">
+                <span>{{ 'ticket.awaiting_support' | t }}</span>
+              </template>
+              <template x-if="ticket.status === 'closed'">
+                <span>{{ 'common.closed' | t }}</span>
+              </template>
+            </span>
+          </div>
+        </div>
+
+        <div class="rounded-card border border-theme bg-surface shadow-card flex flex-col overflow-hidden">
+          <div class="sa-page-customer-ticket-items flex-1 h-[calc(100vh-420px)] min-h-[18rem] overflow-y-auto hide-scrollbar p-4 sm:p-5 flex flex-col gap-4" x-ref="messagesContainer">
+            <template x-for="message in ticket.messages" :key="message.id">
+              <div class="sa-page-customer-ticket-item flex items-start gap-2.5" :class="{ 'flex-row-reverse': message.sender_type === 'shop_customer' }">
+                <template x-if="message.sender_type === 'user'">
+                  {% if shop.image_url %}
+                    <img src="{{ shop.image_url }}" alt="{{ shop.name }}" class="size-8 shrink-0 rounded-full bg-accent-500/10 object-scale-down p-0.5" />
+                  {% else %}
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-t-primary/5 border border-theme text-t-muted">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/></svg>
+                    </span>
+                  {% endif %}
+                </template>
+                <template x-if="message.sender_type === 'shop_customer'">
+                  <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-500/10 text-accent-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </span>
+                </template>
+
+                <div class="max-w-[85%] sm:max-w-[75%] rounded-card border px-3.5 py-2.5" :class="message.sender_type === 'shop_customer' ? 'bg-accent-500/[0.07] border-accent-500/20' : 'bg-t-primary/[0.03] border-theme'">
+                  <div class="flex items-baseline gap-2" :class="{ 'flex-row-reverse': message.sender_type === 'shop_customer' }">
+                    <p class="text-xs font-medium" :class="message.sender_type === 'shop_customer' ? 'text-accent-500' : 'text-t-primary'">
+                      <template x-if="message.sender_type === 'user'">
+                        <span>{{ shop.name }}</span>
+                      </template>
+                      <template x-if="message.sender_type === 'shop_customer'">
+                        <span>{{ 'ticket.you' | t }}</span>
+                      </template>
+                    </p>
+                    <span class="text-[11px] text-t-muted" x-text="getTimeAgo(message.created_at)"></span>
+                  </div>
+                  <p class="mt-1 text-sm text-t-primary whitespace-normal [overflow-wrap:anywhere]" :class="{ 'text-right': message.sender_type === 'shop_customer' }" x-html="message.content"></p>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <div class="border-t border-theme bg-surface p-3 sm:p-4">
+            <template x-if="ticket.status !== 'closed'">
+              <form @submit.prevent="sendMessage()">
+                <div class="flex items-end gap-2 relative">
+                  <textarea
+                    x-model="formMessage"
+                    placeholder="{{ 'ticket.reply_placeholder_short' | t }}"
+                    maxlength="8192"
+                    required
+                    class="input hide-scrollbar resize-none max-h-24 !h-auto min-h-9 py-2"
+                    style="field-sizing: content;"
+                    :disabled="'{{ ticket.status }}' === 'closed' || isSubmitting"
+                    @keydown="handleEnterKey($event)"
+                    rows="1"
+                  ></textarea>
+                  <button
+                    type="submit"
+                    :disabled="isSubmitting || '{{ ticket.status }}' === 'closed'"
+                    class="size-9 shrink-0 inline-flex items-center justify-center rounded-btn bg-accent-500 text-on-accent hover:enabled:bg-accent-600 transition-colors duration-theme shadow-btn disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="{{ 'ticket.send_message' | t }}"
+                  >
+                    <template x-if="isSubmitting">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    </template>
+                    <template x-if="!isSubmitting">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    </template>
+                  </button>
+
+                  <template x-if="formError">
+                    <p class="absolute left-0 top-full mt-1 text-error text-xs" x-text="formError"></p>
+                  </template>
+                </div>
+              </form>
+            </template>
+            <template x-if="ticket.status === 'closed'">
+              <p class="text-center text-sm text-t-muted py-1">
+                {{ 'ticket.closed_notice' | t }}
+              </p>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('ticket', () => ({
+      ticket: {{ ticket | json }},
+      formMessage: '',
+      formError: '',
+      isSubmitting: false,
+
+      init() {
+        this.scrollToBottom();
+
+        setInterval(() => {
+          this.fetchTicket();
+        }, 10000);
+      },
+
+      scrollToBottom() {
+        this.$nextTick(() => {
+          if (this.$refs.messagesContainer) {
+            this.$refs.messagesContainer.scrollTop = this.$refs.messagesContainer.scrollHeight;
+          }
+        });
+      },
+
+      getTimeAgo(input) {
+        const date = (input instanceof Date) ? input : new Date(input);
+        const formatter = new Intl.RelativeTimeFormat('en');
+        const ranges = {
+          years: 3600 * 24 * 365,
+          months: 3600 * 24 * 30,
+          weeks: 3600 * 24 * 7,
+          days: 3600 * 24,
+          hours: 3600,
+          minutes: 60,
+          seconds: 1
+        };
+        const secondsElapsed = (date.getTime() - Date.now()) / 1000;
+        for (let key in ranges) {
+          if (ranges[key] < Math.abs(secondsElapsed)) {
+            const delta = secondsElapsed / ranges[key];
+            return formatter.format(Math.round(delta), key);
+          }
+        }
+
+        return 'just now';
+      },
+
+      async fetchTicket() {
+        const token = Cookies.get('shop_customer_token');
+
+        try {
+          const response = await fetch(`{{ ('/v1/customer-dashboard/tickets/' ~ ticket.id) | apiInternalUrl }}`, {
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            }
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch ticket');
+          }
+
+          this.ticket = await response.json();
+          this.scrollToBottom();
+        } catch (error) {
+          console.error('Failed to fetch ticket:', error);
+        }
+      },
+
+      async sendMessage() {
+        if (!this.formMessage.trim()) {
+          this.formError = 'Message is required.';
+          return;
+        }
+
+        if (this.formMessage.length > 8192) {
+          this.formError = 'Message is too long.';
+          return;
+        }
+
+        this.isSubmitting = true;
+        this.formError = '';
+
+        const token = Cookies.get('shop_customer_token');
+
+        try {
+          const response = await fetch(`{{ ('/v1/customer-dashboard/tickets/' ~ ticket.id ~ '/messages') | apiInternalUrl }}`, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              content: this.formMessage
+            })
+          });
+
+          if (response.status === 429) {
+            throw new Error('You are sending messages too quickly.');
+          }
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to send message');
+          }
+
+          this.formMessage = '';
+          this.formError = '';
+          this.isSubmitting = false;
+
+          await this.fetchTicket();
+        } catch (error) {
+          console.error('Failed to send message:', error);
+          this.formError = 'Failed to send message';
+        } finally {
+          this.isSubmitting = false;
+        }
+      },
+
+      handleEnterKey(event) {
+        if (event.key === 'Enter') {
+          if (event.shiftKey) {
+            return;
+          } else {
+            event.preventDefault();
+            this.sendMessage();
+          }
+        }
+      }
+    }));
+  });
+</script>

@@ -1,0 +1,49 @@
+<section id="{{ componentId }}" class="component sa-page-status py-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    {% render_snippet "section-header.njk",
+      header_headline=properties.headline,
+      header_title=properties.title,
+      header_subtitle=properties.subtitle,
+      header_align=properties.header_align,
+      header_size='h1'
+    %}
+
+    {# statuses mixes groups and standalone products; a group is any entry
+       with a nested products list (backend pre-filters statusless products
+       and empty groups) and has no status fields of its own. #}
+    {% set _sections = [] %}
+    {% set _ungrouped = [] %}
+    {% for item in statuses %}
+      {% if item.products %}
+        {% if item.products | length %}
+          {% if _sections.push(item) %}{% endif %}
+        {% endif %}
+      {% elif not item.group_id %}
+        {% if _ungrouped.push(item) %}{% endif %}
+      {% endif %}
+    {% endfor %}
+
+    {% if _ungrouped | length or _sections | length %}
+      <div class="sa-page-status-items max-w-3xl {{ 'mx-auto' if (properties.header_align if properties.header_align else 'center') == 'center' }} flex flex-col gap-3">
+        {% for item in _ungrouped %}
+          <div class="sa-page-status-item" data-dsr>
+            {% render_snippet "status-card.njk", item=item %}
+          </div>
+        {% endfor %}
+        {% for group in _sections %}
+          <div class="flex items-center gap-3 mt-5 first:mt-0" data-dsr>
+            <h2 class="text-base font-heading font-bold text-t-primary">{{ group.name }}</h2>
+            <div class="flex-1 h-px bg-t-primary/10" aria-hidden="true"></div>
+          </div>
+          {% for item in group.products %}
+            <div class="sa-page-status-item" data-dsr>
+              {% render_snippet "status-card.njk", item=item %}
+            </div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-center text-t-muted py-16">{{ 'status.none' | t }}</p>
+    {% endif %}
+  </div>
+</section>

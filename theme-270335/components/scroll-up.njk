@@ -1,0 +1,83 @@
+<!-- designed by https://theme.mysellauth.com/ -->
+<button id="scrollUpBtn" class="scroll-up-btn" aria-label="Scroll to top">
+  <i class="{{ properties.icon }}"></i>
+</button>
+<!-- designed by https://theme.mysellauth.com/ -->
+<style>
+  .scroll-up-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: {{ properties.button_color }};
+    border: 1px solid {{ properties.button_color }};
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(1rem);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 9999;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    font-size: 1.125rem;
+  }
+
+  .scroll-up-btn.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .scroll-up-btn:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    transform: translateY(-0.25rem);
+    filter: brightness(1.1);
+  }
+
+  .scroll-up-btn:active {
+    transform: translateY(0) scale(0.95);
+  }
+
+  @media (max-width: 768px) {
+    .scroll-up-btn {
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 2.75rem;
+      height: 2.75rem;
+    }
+  }
+</style>
+<!-- designed by https://theme.mysellauth.com/ -->
+<script>
+(function() {
+  'use strict';
+
+  const scrollUpBtn = document.getElementById('scrollUpBtn');
+
+  function toggleButtonVisibility() {
+    if (window.pageYOffset > 300) {
+      scrollUpBtn.classList.add('visible');
+    } else {
+      scrollUpBtn.classList.remove('visible');
+    }
+  }
+
+  function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  window.addEventListener('scroll', toggleButtonVisibility);
+  scrollUpBtn.addEventListener('click', scrollToTop);
+
+  toggleButtonVisibility();
+})();
+</script>
+<!-- designed by https://theme.mysellauth.com/ -->

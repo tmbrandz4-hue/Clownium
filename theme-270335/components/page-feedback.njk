@@ -1,0 +1,56 @@
+{% set _fpStyle = properties.card_style if properties.card_style else 'classic' %}
+{% set _fpLines = properties.message_lines if properties.message_lines else '4' %}
+{% set _fpShowImages = properties.show_images != false %}
+{% set _fpShowDate = properties.show_date != false %}
+{% set _fpShowProducts = properties.show_products != false %}
+{% set _fpVerified = properties.verified_badge if properties.verified_badge else 'verified' %}
+
+<section id="{{ componentId }}" class="component sa-page-feedback sa-page-feedback--{{ _fpStyle }} py-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    {% render_snippet "section-header.njk",
+      header_headline=properties.headline,
+      header_title=properties.title,
+      header_subtitle=properties.subtitle,
+      header_align=properties.header_align,
+      header_size='h1'
+    %}
+
+    {% if not properties.hide_sorting %}
+      <div class="sa-page-feedback-actions flex flex-wrap items-center gap-2 mb-6" data-dsr>
+        {% set _sortOptions = [
+          { key: 'created_at', dir: 'desc', label: 'Newest' },
+          { key: 'created_at', dir: 'asc', label: 'Oldest' },
+          { key: 'rating', dir: 'desc', label: 'Highest rated' },
+          { key: 'rating', dir: 'asc', label: 'Lowest rated' }
+        ] %}
+        {% for option in _sortOptions %}
+          {% set _isActive = orderColumn == option.key and orderDirection == option.dir %}
+          <a
+            href="{{ ('/feedback?orderColumn=' + option.key + '&orderDirection=' + option.dir) | shopUrl }}"
+            class="sa-page-feedback-link px-3.5 py-2 rounded-btn text-sm font-medium border transition-colors duration-theme {{ 'bg-accent-500 border-accent-500 text-on-accent' if _isActive else 'border-theme text-t-muted hover:text-t-primary hover:bg-t-primary/5' }}"
+          >
+            {{ option.label }}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if feedbacks | length %}
+      <div class="sa-page-feedback-items grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-grid-gap">
+        {% for feedback in feedbacks %}
+          <div class="sa-page-feedback-item" data-dsr>
+            {% render_snippet "feedback-card.njk", feedback=feedback, fb_style=_fpStyle, fb_lines=_fpLines, fb_show_images=_fpShowImages, fb_show_date=_fpShowDate, fb_show_products=_fpShowProducts, fb_verified=_fpVerified %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-center text-t-muted py-16">{{ 'feedback.none' | t }}</p>
+    {% endif %}
+
+    {% if feedbacks_paginator.last_page > 1 %}
+      <div class="mt-8">
+        {% render_snippet "pagination.njk", paginator=feedbacks_paginator %}
+      </div>
+    {% endif %}
+  </div>
+</section>

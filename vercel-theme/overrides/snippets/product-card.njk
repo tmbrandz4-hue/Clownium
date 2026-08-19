@@ -1,0 +1,320 @@
+  <a
+    class="shop-card card text-decoration-none"
+    href="{{ 'javascript:void(0);' if product.type == 'group' else ( ('/product/' + product.path) | shopUrl ) }}"
+    data-bs-toggle="{{ 'modal' if product.type == 'group' else '' }}"
+    data-bs-target="{{ '#group-modal-' ~ product.id if product.type == 'group' else '' }}"
+  >
+    <div class="card-img-top">
+      {% if product.image_urls|length > 0 %}
+        <img src="{{ product.image_urls[0] }}" class="img-fluid" loading="lazy" />
+      {% elif product.image_url %}
+        <img src="{{ product.image_url }}" class="img-fluid" loading="lazy" />
+      {% else %}
+        <div class="product-img-placeholder" style="color: {{ global.properties.theme_color or '#3b82f6' }};">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">
+            <path fill="currentColor" d="m222.72 67.91l-88-48.18a13.9 13.9 0 0 0-13.44 0l-88 48.18A14 14 0 0 0 26 80.18v95.64a14 14 0 0 0 7.28 12.27l88 48.18a13.92 13.92 0 0 0 13.44 0l88-48.18a14 14 0 0 0 7.28-12.27V80.18a14 14 0 0 0-7.28-12.27Z"/>
+          </svg>
+        </div>
+      {% endif %}
+
+      <span class="spot" aria-hidden="true"></span>
+
+      <div class="overlay">
+        <button class="btn btn-cta btn-sm" type="button">View Details</button>
+      </div>
+
+      {% if product.product_badges.card|length > 0 %}
+        <div class="badges">
+          {% for productBadge in product.product_badges.card %}
+            <div class="pill" style="--pill: {{ productBadge.color }}">
+              {% if productBadge.icon %}<i class="{{ productBadge.icon }}"></i>{% endif %}
+              {{ productBadge.label }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card-body">
+      <div class="meta">
+        <p class="price">
+          {% if product.min_price != product.max_price %}
+            <span class="p-now" x-text="appCurrency.format({{ product.min_price }}, '{{ product.currency }}')">
+              {{ formatPrice(product.min_price, product.currency) }}
+            </span>
+            <span class="p-dash">–</span>
+            <span class="p-now" x-text="appCurrency.format({{ product.max_price }}, '{{ product.currency }}')">
+              {{ formatPrice(product.max_price, product.currency) }}
+            </span>
+          {% elif product.min_price %}
+            <span class="p-now" x-text="appCurrency.format({{ product.min_price }}, '{{ product.currency }}')">
+              {{ formatPrice(product.min_price, product.currency) }}
+            </span>
+          {% else %}
+            <span class="p-now">-</span>
+          {% endif %}
+
+          {% if product.min_price_slash %}
+            <s class="p-old" x-text="appCurrency.format({{ product.min_price_slash }}, '{{ product.currency }}')">
+              {{ formatPrice(product.min_price_slash, product.currency) }}
+            </s>
+          {% endif %}
+        </p>
+
+        <div class="chip
+          {% if product.type == 'group' %} chip-info
+          {% elif product.stock === 0 %} chip-out
+          {% elif product.stock === -1 %} chip-unl
+          {% else %} chip-ok {% endif %}">
+          {% if product.type == 'group' %}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11V7H8v4H2V5h4V1h12v4h4v6h-6Zm-6 2h4v4h6v6H4v-6h6v-4Z"/></svg>
+            {{ product.products | length }} Products
+          {% else %}
+            {% if product.stock === 0 %}
+              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20Zm4.95 14.54L7.46 7.05l1.41-1.41l9.49 9.49l-1.41 1.41Z"/></svg>
+              Out of Stock
+            {% elif product.stock === -1 %}
+              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M5 12c0-3.866 3.134-7 7-7c1.657 0 3.173.576 4.354 1.536L14.4 8.49A3.5 3.5 0 0 0 12 7.5C9.515 7.5 7.5 9.515 7.5 12S9.515 16.5 12 16.5c1.05 0 2.01-.404 2.724-1.076l1.95 1.95A6.98 6.98 0 0 1 12 19c-3.866 0-7-3.134-7-7Z"/></svg>
+              In Stock
+            {% else %}
+              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 21q-.425 0-.712-.288T8 20t.288-.712T9 19h6q.425 0 .713.288T16 20t-.288.713T15 21H9Zm3-4q-2.925 0-4.962-2.038T5 10V6q0-.825.588-1.413T7 4h10q.825 0 1.413.587T19 6v4q0 2.925-2.037 4.962T12 17Z"/></svg>
+              {{ product.stock }} In Stock
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+
+      <h5 class="card-title">{{ product.name }}</h5>
+    </div>
+  </a>
+
+<style>
+/* =========================
+   Hyper Night Theme Tokens
+   ========================= */
+.shop-card.card{
+  /* Core palette (black + dark blue) */
+  --surface: #0b0f14;            /* card bg */
+  --surface-2: #0d1320;          /* deeper bg */
+  --border: rgba(160,200,255,.08);
+  --shadow: rgba(0, 10, 30, .55);
+
+  /* Accents (electric blues) */
+  --accent: #4da2ff;
+  --accent-2:#1f6aff;
+
+  /* Status chips */
+  --ok:#10d28a;   --ok2:#00b877;
+  --out:#ff5a6c;  --out2:#e04153;
+  --unl:#9a7cff;  --unl2:#6f58ff;
+  --info:#7bd4ff; --info2:#4da2ff;
+
+  /* Dynamic tilt + spotlight coords */
+  --rx:0deg; --ry:0deg;
+  --mx:-200px; --my:-200px;
+
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  border:1px solid var(--border);
+  border-radius:18px; overflow:hidden;
+  box-shadow: 0 16px 42px var(--shadow);
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateZ(0);
+  transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, opacity .4s, border-color .35s;
+  position:relative; isolation:isolate;
+  opacity:1;
+}
+
+/* Initial reveal */
+.shop-card.card.reveal-init{
+  opacity:0; transform: translateY(14px) rotateX(var(--rx)) rotateY(var(--ry));
+}
+.shop-card.card.reveal{
+  opacity:1; transform: translateY(0) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform .55s cubic-bezier(.22,1,.36,1), box-shadow .35s, opacity .45s;
+}
+
+/* Media container */
+.shop-card .card-img-top{
+  position:relative; aspect-ratio: 16/9; background:#070a10; overflow:hidden;
+}
+.shop-card .card-img-top img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  transform:scale(1.03);
+  transition: transform .55s cubic-bezier(.22,1,.36,1), filter .35s;
+  filter: brightness(.95) contrast(1.06) saturate(1.02);
+}
+.shop-card:hover .card-img-top img{ transform:scale(1.08); }
+
+/* Ambient bloom */
+.shop-card .card-img-top::before{
+  content:""; position:absolute; right:-16%; bottom:-18%;
+  width:540px; height:540px; border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent) 24%, transparent) 0, transparent 60%);
+  filter: blur(46px); opacity:.6; pointer-events:none;
+}
+
+/* Interactive spotlight (shifted to blue tones) */
+.shop-card .card-img-top .spot{
+  position:absolute; inset:-1px; pointer-events:none; opacity:0; transition:opacity .2s ease;
+  background:
+    radial-gradient(260px 160px at var(--mx) var(--my), rgba(200,230,255,.18), transparent 60%),
+    radial-gradient(220px 150px at calc(var(--mx) + 40px) calc(var(--my) + 20px), rgba(77,162,255,.22), transparent 60%);
+  mix-blend-mode:screen;
+}
+.shop-card:hover .card-img-top .spot{ opacity:1; }
+
+/* CTA overlay */
+.shop-card .overlay{
+  position:absolute; left:0; right:0; bottom:12px;
+  display:flex; justify-content:center;
+  transform: translateY(8px); opacity:0; z-index:2;
+  transition: transform .25s, opacity .25s; pointer-events:none;
+}
+.shop-card:hover .overlay{ transform: translateY(0); opacity:1; }
+.shop-card .btn-cta{
+  pointer-events:auto;
+  font-weight:900; letter-spacing:.01em; border:1px solid rgba(120,180,255,.35);
+  color:#061021;
+  background:linear-gradient(90deg,var(--accent-2),var(--accent));
+  box-shadow:0 12px 26px rgba(77,162,255,.35), inset 0 1px 0 rgba(255,255,255,.35);
+  border-radius:12px; padding:.55rem 1rem; backdrop-filter: blur(8px);
+}
+
+/* Badges */
+.shop-card .badges{ position:absolute; inset:auto auto 10px 10px; display:flex; gap:8px; z-index:2; flex-wrap:wrap; }
+.shop-card .pill{
+  --p: var(--pill, var(--accent));
+  display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
+  background: color-mix(in oklab, var(--p) 86%, black 0%);
+  color:#041224; font-weight:800; font-size:.75rem;
+  box-shadow:0 8px 18px rgba(0,0,0,.28), 0 0 0 1px rgba(120,180,255,.12) inset;
+}
+
+/* Body */
+.shop-card .card-body{ padding:12px 14px 16px; background: linear-gradient(180deg, transparent 0%, rgba(9,14,24,.22) 100%); }
+.shop-card .meta{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; }
+.shop-card .price{ margin:0; display:flex; align-items:baseline; gap:.4rem; flex-wrap:wrap; }
+.shop-card .price .p-now{ color:#eaf2ff; font-weight:900; font-size:1.05rem; text-shadow: 0 0 12px rgba(77,162,255,.18); }
+.shop-card .price .p-old{ color:#9ab0cf; font-weight:700; font-size:.85rem; opacity:.7; }
+.shop-card .price .p-dash{ color:#7e93b1; opacity:.75; }
+
+/* Chips */
+.shop-card .chip{
+  display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
+  font-size:.72rem; font-weight:800; letter-spacing:.01em; white-space:nowrap;
+  border:1px solid rgba(120,180,255,.14);
+}
+.shop-card .chip svg{ width:14px; height:14px; }
+.shop-card .chip-ok{  color:#031a12; background: linear-gradient(90deg,var(--ok),var(--ok2));  box-shadow: 0 8px 18px rgba(16,210,138,.25); }
+.shop-card .chip-out{ color:#27090e; background: linear-gradient(90deg,var(--out),var(--out2)); box-shadow: 0 8px 18px rgba(255,90,108,.25); }
+.shop-card .chip-unl{ color:#0d0a25; background: linear-gradient(90deg,var(--unl),var(--unl2)); box-shadow: 0 8px 18px rgba(154,124,255,.22); }
+.shop-card .chip-info{color:#041428; background: linear-gradient(90deg,var(--info),var(--info2)); box-shadow: 0 8px 18px rgba(75,160,255,.22); }
+
+/* Title */
+.shop-card .card-title{
+  color:#e6efff; font-weight:900; margin:4px 0 0; letter-spacing:.01em; line-height:1.15;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  text-shadow: 0 0 10px rgba(33,96,187,.18);
+}
+
+/* Hover & focus elevation */
+.shop-card:hover{
+  box-shadow: 0 24px 60px rgba(0,10,30,.65), 0 0 0 1px rgba(120,180,255,.12) inset;
+  border-color: rgba(120,180,255,.18);
+}
+
+/* Keyboard accessibility */
+.shop-card:focus-visible{
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(33,150,243,.65),
+    0 0 0 6px rgba(33,150,243,.25),
+    0 24px 60px rgba(0,10,30,.65);
+  border-color: rgba(120,180,255,.35);
+}
+
+/* No-JS fallback */
+noscript .shop-card.card{ opacity:1 !important; transform:none !important; }
+
+/* Placeholder */
+.product-img-placeholder{
+  width:100%; height:100%; display:grid; place-items:center; background: #0a0f18;
+}
+.product-img-placeholder svg{ opacity:.9; }
+
+/* Motion preferences */
+@media (prefers-reduced-motion: reduce){
+  .shop-card.card,
+  .shop-card .card-img-top img,
+  .shop-card .overlay{
+    transition:none !important;
+  }
+}
+</style>
+
+<script>
+(function(){
+  try{
+    const cards = Array.from(document.querySelectorAll('.shop-card.card'));
+    if(!cards.length) return;
+
+    cards.forEach(c => c.classList.add('reveal-init'));
+
+    const ioSupported = 'IntersectionObserver' in window;
+    if(ioSupported){
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e => {
+          if(e.isIntersecting){
+            e.target.classList.add('reveal');
+            e.target.classList.remove('reveal-init');
+            io.unobserve(e.target);
+          }
+        });
+      }, {threshold:.18, rootMargin:'40px'});
+      cards.forEach(c => io.observe(c));
+    }else{
+      cards.forEach(c => { c.classList.add('reveal'); c.classList.remove('reveal-init'); });
+    }
+
+    const clamp = (n, min, max)=> Math.min(max, Math.max(min, n));
+
+    cards.forEach(c=>{
+      const surface = c.querySelector('.card-img-top');
+      const onMove = (e)=>{
+        const r = c.getBoundingClientRect();
+        const x = (('clientX' in e ? e.clientX : e.touches[0].clientX) - r.left)/r.width - .5;
+        const y = (('clientY' in e ? e.clientY : e.touches[0].clientY) - r.top)/r.height - .5;
+        const rx = clamp(-y * 6, -6, 6);
+        const ry = clamp( x * 8, -8, 8);
+        c.style.setProperty('--rx', rx + 'deg');
+        c.style.setProperty('--ry', ry + 'deg');
+
+        const rs = surface.getBoundingClientRect();
+        const cx = ('clientX' in e ? e.clientX : e.touches[0].clientX) - rs.left;
+        const cy = ('clientY' in e ? e.clientY : e.touches[0].clientY) - rs.top;
+        c.style.setProperty('--mx', cx + 'px');
+        c.style.setProperty('--my', cy + 'px');
+      };
+      const onLeave = ()=>{
+        c.style.setProperty('--rx','0deg');
+        c.style.setProperty('--ry','0deg');
+        c.style.setProperty('--mx','-200px');
+        c.style.setProperty('--my','-200px');
+      };
+
+      c.addEventListener('mousemove', onMove, {passive:true});
+      c.addEventListener('mouseleave', onLeave, {passive:true});
+      c.addEventListener('touchstart', onMove, {passive:true});
+      c.addEventListener('touchmove',  onMove, {passive:true});
+      c.addEventListener('touchend',   onLeave, {passive:true});
+    });
+  }catch(e){
+    document.querySelectorAll('.shop-card.card').forEach(c=>{
+      c.classList.remove('reveal-init');
+      c.classList.add('reveal');
+      c.style.opacity = '1';
+      c.style.transform = 'none';
+    });
+  }
+})();
+</script>

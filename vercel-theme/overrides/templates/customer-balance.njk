@@ -1,0 +1,252 @@
+{% set topUpAmounts = [5, 10, 25, 50, 100] %}
+
+<div class="container component py-5-nav" data-component-id="{{ componentId }}">
+  <div class="mb-4">
+    <h1 class="fw-bold mb-0" style="font-size:1.75rem">My Account</h1>
+    <small style="color:#9ab0cf">{{ shop_customer.email }}</small>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-lg-3 mb-4">
+      {% render_snippet "customer-sidebar.njk" %}
+    </div>
+
+    <div class="col-12 col-lg-9">
+      <div class="row">
+        <div class="col-12 col-md-4 mb-4">
+          <div class="cl-stat-card p-4 h-100">
+            <div class="cl-stat-label">Available Balance</div>
+            <div class="cl-stat-value">
+              <span x-text="appCurrency.format({{ shop_customer.balance }}, 'USD')">
+                {{ formatPrice(shop_customer.balance, 'USD') }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-8 mb-4">
+          <div class="cl-dash-card p-4 h-100">
+            <h5 class="fw-semibold mb-2">Balance</h5>
+            <p style="color:#9ab0cf" class="mb-0">
+              Customer balance can be used to pay for future orders.
+              {% if shop.settings.reseller.enabled %}
+                It can also be used for reseller orders.
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="cl-dash-card p-4 mb-4">
+        <h5 class="fw-semibold mb-3">Top Up</h5>
+        {% if balance_product_id and balance_product_variant_id %}
+          <form x-data="topUpBalance" @submit.prevent="buy">
+            <p style="color:#9ab0cf;font-size:.875rem" class="mb-3">
+              Click an amount to top up your balance.
+            </p>
+
+            {% if altcha %}
+              <div
+                x-cloak
+                x-show="!altchaPayload"
+                class="mb-3 transition-opacity"
+                x-transition:enter="transition ease-out duration-300 transform"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200 transform"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+              >
+                <altcha-widget
+                  challengejson='{{ altcha | json }}'
+                  auto="onload"
+                  hidefooter="true"
+                  hidelogo="true"
+                  x-ref="altcha"
+                ></altcha-widget>
+              </div>
+            {% endif %}
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              {% for amount in topUpAmounts %}
+                <button
+                  type="submit"
+                  @click="amount = {{ amount }}"
+                  :disabled="buyingAmount === {{ amount }} || buyNowDisabled"
+                  class="btn cl-dash-btn-outline position-relative"
+                >
+                  <span :class="buyingAmount === {{ amount }} ? 'opacity-0' : 'opacity-100'">
+                    {{ formatPrice(amount, 'USD') }}
+                  </span>
+                  <template x-if="buyingAmount === {{ amount }}">
+                    <span class="position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center">
+                      <i class="fa fa-circle-notch fa-spin"></i>
+                    </span>
+                  </template>
+                </button>
+              {% endfor %}
+            </div>
+          </form>
+        {% else %}
+          <p style="color:#9ab0cf" class="mb-0">Not available.</p>
+        {% endif %}
+      </div>
+
+      <div class="cl-dash-card p-4">
+        <h5 class="fw-semibold mb-3">Transaction History</h5>
+        <div class="table-responsive">
+          <table class="table cl-table mb-0">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Type</th>
+                <th scope="col">Description</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if balance_transactions.data.length > 0 %}
+                {% for transaction in balance_transactions.data %}
+                  <tr>
+                    <td>{{ transaction.id }}</td>
+                    <td class="text-capitalize">{{ transaction.type }}</td>
+                    <td>
+                      {% if transaction.description %}
+                        {{ transaction.description }}
+                      {% elif transaction.invoice %}
+                        <a href="/checkout/{{ transaction.invoice.unique_id }}" target="_blank" style="color:#3b82f6" class="text-decoration-none">
+                          Invoice #{{ transaction.invoice.unique_id }}
+                        </a>
+                      {% else %}
+                        -
+                      {% endif %}
+                    </td>
+                    <td>{{ formatPrice(transaction.amount, 'USD') }}</td>
+                    <td>{{ transaction.created_at | formatDateTime }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center" style="color:#9ab0cf">No balance transactions yet.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {% if balance_transactions.last_page > 1 %}
+        <div class="mt-4">
+          {% render_snippet "pagination.njk", paginator=balance_transactions %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="components">
+  {% for componentId in components_order %}
+    {% render_component componentId %}
+  {% endfor %}
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+  Alpine.data('topUpBalance', () => ({
+    amount: null,
+    buyingAmount: null,
+    altchaPayload: null,
+    buyNowDisabled: {{ 'true' if altcha else 'false' }},
+
+    init: function () {
+      {% if altcha %}
+        this.addAltchaEventListener();
+      {% endif %}
+    },
+
+    addAltchaEventListener: function () {
+      this.$refs.altcha.addEventListener('statechange', (event) => {
+        if (event.detail.state === 'verifying') {
+          this.buyNowDisabled = true;
+        } else if (event.detail.state === 'verified') {
+          this.buyNowDisabled = false;
+          this.altchaPayload = event.detail.payload;
+        }
+      });
+    },
+
+    generateRecaptchaToken: async function () {
+      return new Promise((resolve) => {
+        grecaptcha.ready(
+          () =>
+            void (async () => {
+              const token = await grecaptcha.execute(
+                '{{ shop.recaptcha_key }}',
+                { action: 'buynow_s{{ shop.id }}' },
+              );
+
+              resolve(token);
+            })(),
+        );
+      });
+    },
+
+    buy: async function () {
+      if (this.amount === null || this.buyingAmount !== null || this.buyNowDisabled) {
+        return;
+      }
+
+      const formData = {
+        cart: [{
+          productId: {{ balance_product_id }},
+          variantId: {{ balance_product_variant_id }},
+          quantity: this.amount,
+        }],
+        currency: this.appCurrency.currency,
+        shopId: '{{ shop.id }}',
+      };
+
+      if (window.shopCustomer?.email) {
+        formData.email = window.shopCustomer.email;
+      }
+
+      {% if altcha %}
+        if (this.altchaPayload) {
+          formData.altcha = this.altchaPayload;
+        }
+      {% elif shop.recaptcha_key %}
+        try {
+          formData.recaptchaToken = await this.generateRecaptchaToken();
+        } catch (error) {
+          console.error(error);
+        }
+      {% endif %}
+
+      try {
+        this.buyingAmount = this.amount;
+
+        const response = await fetch('{{ '/v1/checkout' | apiInternalUrl }}', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const responseData = await response.json();
+
+        if (responseData.url) {
+          window.location.href = responseData.url;
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.buyingAmount = null;
+        this.amount = null;
+      }
+    }
+  }));
+});
+</script>

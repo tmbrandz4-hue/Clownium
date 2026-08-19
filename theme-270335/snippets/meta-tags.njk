@@ -1,0 +1,70 @@
+{%- set title = shop.name -%}
+{%- set description = shop.description -%}
+{%- set image = shop.image_url -%}
+{%- set twitterCard = 'summary' -%}
+
+{%- if templateName == 'product' -%}
+  {%- set title = product.meta_title -%}
+  {%- set description = product.meta_description -%}
+  {%- set image = product.meta_image_url -%}
+  {%- set twitterCard = product.meta_twitter_card -%}
+{%- elif templateName == 'cart' -%}
+  {%- set title = 'Shopping Cart - ' ~ shop.name -%}
+  {%- set description = 'Review your shopping cart.' -%}
+{%- elif templateName == 'terms' -%}
+  {%- set title = 'Terms of Service - ' ~ shop.name -%}
+  {%- set description = 'Read our terms of service.' -%}
+{%- elif templateName == 'feedback' -%}
+  {%- set title = 'Reviews - ' ~ shop.name -%}
+  {%- set description = 'Browse ' ~ (feedbacks | length) ~ ' reviews from our customers' -%}
+{%- elif templateName == 'status' -%}
+  {%- set title = 'Status - ' ~ shop.name -%}
+  {%- set description = 'Check the status of our products.' -%}
+{%- elif templateName == 'faq' -%}
+  {%- set title = 'FAQ - ' ~ shop.name -%}
+  {%- set description = 'Read our frequently asked questions.' -%}
+{%- elif templateName == 'blog' -%}
+  {%- set title = 'Blog - ' ~ shop.name -%}
+  {%- set description = 'Read our latest blog posts.' -%}
+{%- elif templateName == 'blog-post' -%}
+  {%- set title = blogPost.meta_title -%}
+  {%- set description = blogPost.meta_description -%}
+  {%- set image = blogPost.image_url -%}
+  {%- set twitterCard = 'summary_large_image' -%}
+{%- elif templateName == 'customer-dashboard' -%}
+  {%- set title = 'My Dashboard - ' ~ shop.name -%}
+{%- elif templateName == 'customer-invoices' -%}
+  {%- set title = 'My Orders - ' ~ shop.name -%}
+{%- elif templateName == 'customer-tickets' -%}
+  {%- set title = 'My Tickets - ' ~ shop.name -%}
+  {%- set description = 'View your support tickets.' -%}
+{%- elif templateName == 'customer-ticket' -%}
+  {%- set title = 'Ticket ' ~ ticket.subject ~ ' - ' ~ shop.name -%}
+  {%- set description = 'View your support ticket details.' -%}
+{%- elif templateName == 'customer-balance' -%}
+  {%- set title = 'My Balance - ' ~ shop.name -%}
+  {%- set description = 'Check your account balance.' -%}
+{%- elif templateName == 'customer-affiliate' -%}
+  {%- set title = 'Affiliate - ' ~ shop.name -%}
+  {%- set description = 'Manage your affiliate program.' -%}
+{%- elif 'custom-page' in templateName -%}
+  {%- set title = name ~ ' - ' ~ shop.name -%}
+  {%- set description = name -%}
+{%- endif -%}
+
+<title>{{ title }}</title>
+<meta name="description" content="{{ description }}">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:image" content="{{ image }}">
+<meta name="twitter:title" content="{{ title }}">
+<meta name="twitter:description" content="{{ description }}">
+<meta name="twitter:card" content="{{ twitterCard }}">
+<link rel="icon" type="image/png" href="{{ shop.favicon_url }}">
+<meta name="theme-color" content="{{ '' | themeColor }}" />
+
+{% if schemaOrg %}
+<script type="application/ld+json">
+{{ schemaOrg | safe }}
+</script>
+{% endif %}

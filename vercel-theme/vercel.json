@@ -1,0 +1,20 @@
+﻿{
+  "buildCommand": "node build.mjs",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "crons": [
+    { "path": "/api/revalidate", "schedule": "0 */6 * * *" }
+  ],
+  "redirects": [
+    { "source": "/account", "destination": "/customer/dashboard", "statusCode": 308 },
+    {
+      "source": "/customer/:path*",
+      "destination": "https://clownium.mysellauth.com/customer/:path*",
+      "statusCode": 302
+    },
+    { "source": "/about", "destination": "/", "statusCode": 308 },
+    { "source": "/features", "destination": "/#shop", "statusCode": 308 },
+    { "source": "/terms", "destination": "/terms-of-service", "statusCode": 308 }
+  ]
+}

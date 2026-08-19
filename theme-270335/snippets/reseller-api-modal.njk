@@ -1,0 +1,103 @@
+<div
+  x-show="appReseller.apiModalIsOpen"
+  x-cloak
+  class="sa-reseller-api-modal fixed inset-0 z-50 overflow-y-auto"
+  aria-labelledby="reseller-api-modal-title"
+  role="dialog"
+  aria-modal="true"
+>
+  <div class="flex items-center justify-center min-h-screen px-4 text-center">
+    <div
+      x-show="appReseller.apiModalIsOpen"
+      x-transition:enter="transition ease-out duration-300 transform"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="transition ease-in duration-200 transform"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+      @click="appReseller.closeApiModal()"
+      class="fixed inset-0 transition-opacity [background-color:var(--cl-overlay)]"
+      aria-hidden="true"
+    ></div>
+
+    <div
+      x-show="appReseller.apiModalIsOpen"
+      x-transition:enter="transition ease-out duration-300 transform"
+      x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+      x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+      x-transition:leave="transition ease-in duration-200 transform"
+      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+      class="inline-block w-full max-w-xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform border border-theme rounded-card bg-surface-raised shadow-modal text-t-primary"
+    >
+      <div class="flex items-start justify-between gap-4">
+        <h3 id="reseller-api-modal-title" class="text-h4 font-heading truncate">
+          {{ 'reseller.api' | t }}
+        </h3>
+
+        <button @click="appReseller.closeApiModal()" class="text-t-muted focus:outline-none hover:text-t-primary transition-colors duration-theme">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <p class="text-sm text-t-muted mt-2">
+        Check your balance and buy products programmatically, from any platform.
+        {% if reseller_api_docs_url %}
+          <a href="{{ reseller_api_docs_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-accent-500 hover:text-accent-600 transition-colors duration-theme">
+            {{ 'reseller.api_docs' | t }}
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+          </a>
+        {% endif %}
+      </p>
+
+      <div
+        class="mt-4 p-3 rounded-input border border-accent-500/25 bg-accent-500/[0.04]"
+        x-show="appReseller.apiKey"
+        x-cloak
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+      >
+        <div class="flex items-center justify-between gap-2">
+          <p class="text-xs font-medium text-t-primary">{{ 'reseller.new_api_key' | t }}</p>
+          <button
+            type="button"
+            x-data="{ copied: false }"
+            @click="navigator.clipboard.writeText(appReseller.apiKey); copied = true; setTimeout(() => copied = false, 2000)"
+            class="inline-flex items-center gap-1 text-xs font-medium text-t-muted hover:text-t-primary transition-colors duration-theme"
+          >
+            <svg x-show="!copied" xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <svg x-show="copied" x-cloak class="size-3.5 text-success" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-4-4"/></svg>
+            <span x-text="copied ? '{{ 'common.copied_short' | t | jsEscape }}' : '{{ 'common.copy' | t | jsEscape }}'"></span>
+          </button>
+        </div>
+        <code class="block mt-2 p-2 text-xs text-t-primary rounded-input border border-theme bg-surface break-all select-all" x-text="appReseller.apiKey"></code>
+        <p class="text-xs text-t-muted mt-2">{{ 'reseller.api_key_once' | t }}</p>
+      </div>
+
+      <p class="text-sm text-error mt-3" x-show="appReseller.apiKeyError" x-cloak x-text="appReseller.apiKeyError"></p>
+
+      <div class="flex flex-wrap items-center gap-3 mt-5">
+        <button
+          type="button"
+          class="relative inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-btn bg-accent-500 text-on-accent hover:enabled:bg-accent-600 transition-colors duration-theme shadow-btn disabled:opacity-50 disabled:pointer-events-none"
+          @click="appReseller.regenerateApiKey()"
+          :disabled="appReseller.apiKeyLoading"
+        >
+          <span :class="appReseller.apiKeyLoading ? 'opacity-0' : 'opacity-100'" x-text="appReseller.apiKey ? '{{ 'reseller.regenerate_api_key' | t | jsEscape }}' : '{{ ('reseller.regenerate_api_key' if reseller_has_api_key else 'reseller.generate_api_key') | t | jsEscape }}'">{{ 'Regenerate API key' if reseller_has_api_key else 'Generate API key' }}</span>
+          <template x-if="appReseller.apiKeyLoading">
+            <span class="absolute inset-0 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            </span>
+          </template>
+        </button>
+
+        {% if reseller_has_api_key %}
+          <p class="text-xs text-t-muted">{{ 'reseller.regenerate_warning' | t }}</p>
+        {% else %}
+          <p class="text-xs text-t-muted" x-show="appReseller.apiKey" x-cloak>{{ 'reseller.regenerate_warning' | t }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

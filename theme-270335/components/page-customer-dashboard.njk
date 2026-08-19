@@ -1,0 +1,109 @@
+<section id="{{ componentId }}" class="component sa-page-customer-dashboard py-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    <div class="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8 items-start">
+      {% render_snippet "customer-sidebar.njk" %}
+
+      <div class="min-w-0">
+        {% render_snippet "customer-header.njk",
+          ch_title=properties.title,
+          ch_subtitle=properties.subtitle,
+          ch_cta_text=properties.cta_text,
+          ch_cta_link=properties.cta_link
+        %}
+
+        {% if properties.show_stats !== false %}
+          <div class="sa-page-customer-dashboard-items grid grid-cols-2 gap-grid-gap {{ 'lg:grid-cols-4' if shop.customer_balance_enabled else 'sm:grid-cols-3' }}">
+            <div class="sa-page-customer-dashboard-item rounded-card border border-theme bg-surface shadow-card p-4 sm:p-5">
+              <span class="size-9 rounded-input bg-accent-500/10 text-accent-500 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>
+              </span>
+              <p class="text-2xl font-semibold text-t-primary mt-3 truncate">{{ shop_customer.total_completed }}</p>
+              <p class="text-sm text-t-muted mt-0.5">{{ 'customer.completed_orders' | t }}</p>
+            </div>
+
+            <div class="sa-page-customer-dashboard-item rounded-card border border-theme bg-surface shadow-card p-4 sm:p-5">
+              <span class="size-9 rounded-input bg-accent-500/10 text-accent-500 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+              </span>
+              <p class="text-2xl font-semibold text-t-primary mt-3 truncate">
+                <span x-text="appCurrency.format({{ shop_customer.total_spent_usd }}, 'USD')">{{ formatPrice(shop_customer.total_spent_usd, 'USD') }}</span>
+              </p>
+              <p class="text-sm text-t-muted mt-0.5">{{ 'customer.total_spent' | t }}</p>
+            </div>
+
+            <div class="sa-page-customer-dashboard-item rounded-card border border-theme bg-surface shadow-card p-4 sm:p-5">
+              <span class="size-9 rounded-input bg-accent-500/10 text-accent-500 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+              </span>
+              <p class="text-2xl font-semibold text-t-primary mt-3 truncate">{{ shop_customer.created_at | formatDate }}</p>
+              <p class="text-sm text-t-muted mt-0.5">{{ 'customer.customer_since' | t }}</p>
+            </div>
+
+            {% if shop.customer_balance_enabled %}
+              <div class="sa-page-customer-dashboard-item rounded-card border border-theme bg-surface shadow-card p-4 sm:p-5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="size-9 rounded-input bg-accent-500/10 text-accent-500 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+                  </span>
+                  <a href="{{ '/customer/balance' | shopUrl }}" class="text-xs font-medium text-accent-500 hover:text-accent-600 transition-colors duration-theme">{{ 'balance.top_up' | t }}</a>
+                </div>
+                <p class="text-2xl font-semibold text-t-primary mt-3 truncate">
+                  <span x-text="appCurrency.format({{ shop_customer.balance }}, 'USD')">{{ formatPrice(shop_customer.balance, 'USD') }}</span>
+                </p>
+                <p class="text-sm text-t-muted mt-0.5">{{ 'common.balance' | t }}</p>
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if properties.show_latest_order !== false %}
+          <div class="rounded-card border border-theme bg-surface shadow-card mt-grid-gap">
+            <div class="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-b border-theme">
+              <h2 class="text-sm font-medium text-t-primary">{{ 'customer.latest_order' | t }}</h2>
+              <a href="{{ '/customer/invoices' | shopUrl }}" class="sa-page-customer-dashboard-link inline-flex items-center gap-1 text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors duration-theme">
+                {{ 'common.view_all' | t }}
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </a>
+            </div>
+            <div class="p-4 sm:p-5">
+              {% if latest_invoice %}
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="font-medium text-t-primary truncate">
+                      {% if latest_invoice.items %}
+                        {% if latest_invoice.items[0].custom_name %}
+                          {{ latest_invoice.items[0].custom_name }}
+                        {% else %}
+                          {{ latest_invoice.items[0].product.name }}
+                          {% if latest_invoice.items[0].variant and latest_invoice.items[0].product.name != latest_invoice.items[0].variant.name %}
+                            ({{ latest_invoice.items[0].variant.name }})
+                          {% endif %}
+                        {% endif %}
+
+                        {% if latest_invoice.items.length > 1 %}
+                          & {{ latest_invoice.items.length - 1 }} more
+                        {% endif %}
+                      {% else %}
+                        {{ 'feedback.deleted_product' | t }}
+                      {% endif %}
+                    </p>
+                    <p class="text-xs text-t-muted mt-0.5">
+                      Invoice <a href="{{ latest_invoice.url }}" target="_blank" class="text-accent-500 hover:text-accent-600 transition-colors duration-theme">#{{ latest_invoice.unique_id }}</a> · {{ latest_invoice.created_at | formatDate }}
+                    </p>
+                  </div>
+                  <a href="{{ latest_invoice.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-btn border border-theme text-t-muted hover:text-t-primary hover:bg-t-primary/5 transition-colors duration-theme">
+                    {{ 'common.view_invoice' | t }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                  </a>
+                </div>
+              {% else %}
+                <p class="text-sm text-t-muted">{{ 'customer.no_orders' | t }}</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</section>

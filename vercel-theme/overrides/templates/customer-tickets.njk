@@ -1,0 +1,66 @@
+<div class="container component" data-component-id="{{ componentId }}">
+  <section class="py-5-nav">
+
+    <div class="mb-4">
+      <h1 class="fw-bold mb-0" style="font-size:1.75rem">My Account</h1>
+      <small style="color:#9ab0cf">{{ shop_customer.email }}</small>
+    </div>
+
+    <div class="row">
+      <div class="col-12 col-lg-3 mb-4">
+        {% render_snippet "customer-sidebar.njk" %}
+      </div>
+      <div class="col-12 col-lg-9">
+        <div class="cl-dash-card p-4">
+          <div class="alert mb-4" style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#93c5fd;border-radius:10px;font-size:.875rem">
+            <i class="fa fa-info-circle me-2"></i>
+            Open a new ticket from the <a href="{{ '/customer/invoices' | shopUrl }}" style="color:#3b82f6">Orders</a> page by clicking "Open Ticket" next to a completed order.
+          </div>
+          <h5 class="fw-semibold mb-3">Tickets</h5>
+          {% if tickets.data.length > 0 %}
+            <div class="table-responsive">
+              <table class="table cl-table">
+                <thead>
+                  <tr>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Opened</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for ticket in tickets.data %}
+                    <tr style="cursor:pointer" onclick="location.href='{{ ('/customer/tickets/' ~ ticket.id) | shopUrl }}'">
+                      <td style="color:#3b82f6">{{ ticket.subject }}</td>
+                      <td>
+                        {% if ticket.status == 'pending' %}
+                          <span class="badge bg-warning text-dark">Awaiting You</span>
+                        {% elif ticket.status == 'open' %}
+                          <span class="badge bg-primary">Awaiting Support</span>
+                        {% else %}
+                          <span class="badge bg-success">Closed</span>
+                        {% endif %}
+                      </td>
+                      <td style="color:#9ab0cf">{{ ticket.created_at | formatDate }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p style="color:#9ab0cf" class="mb-0 text-center py-4">No tickets yet.</p>
+          {% endif %}
+
+          {% if tickets.last_page > 1 %}
+            {% render_snippet "pagination.njk", paginator=tickets %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="components">
+  {% for componentId in components_order %}
+    {% render_component componentId %}
+  {% endfor %}
+</div>

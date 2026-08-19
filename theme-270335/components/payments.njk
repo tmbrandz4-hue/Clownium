@@ -1,0 +1,62 @@
+<!-- designed by https://theme.mysellauth.com/ -->
+<section class="pm-section component" data-component-id="{{ componentId }}">
+  <div class="pm-bg-glows" aria-hidden="true">
+    <div class="pm-glow pm-glow-1"></div>
+    <div class="pm-glow pm-glow-2"></div>
+  </div>
+  <div class="pm-container">
+    <div class="pm-header pc-reveal-content">
+      {% if properties.title %}
+      <h2 class="pm-title">{{ properties.title | renderString }}</h2>
+      {% endif %}
+      {% if properties.subtitle %}
+      <p class="pm-subtitle">{{ properties.subtitle | renderString }}</p>
+      {% endif %}
+    </div>
+    <div class="pm-grid pc-reveal-content">
+      {% for method in properties.payment_methods %}
+      {% if method.enabled %}
+      <div class="pm-card">
+        <div class="pm-icon">
+          <i class="{{ method.icon }}"></i>
+        </div>
+        <h3 class="pm-name">{{ method.name }}</h3>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<!-- designed by https://theme.mysellauth.com/ -->
+<style>
+.pm-section{position:relative;padding:4rem 0;overflow:hidden}
+@media(min-width:768px){.pm-section{padding:6rem 0}}
+.pm-bg-glows{position:absolute;inset:-200px;pointer-events:none;z-index:0}
+.pm-glow{position:absolute;border-radius:50%;filter:blur(60px)}
+.pm-glow-1{width:600px;height:400px;top:60px;left:-100px;background:radial-gradient(ellipse at center,rgba(247,50,52,.12) 0%,transparent 70%)}
+.pm-glow-2{width:500px;height:500px;bottom:80px;right:-80px;background:radial-gradient(ellipse at center,rgba(247,50,52,.09) 0%,transparent 70%)}
+.pm-container{margin:0 auto;width:100%;max-width:80rem;padding:0 1.5rem;position:relative;z-index:1}
+.pm-header{margin:0 auto 2.5rem;max-width:48rem;text-align:center}
+@media(min-width:768px){.pm-header{margin-bottom:3rem}}
+.pm-title{font-size:1.875rem;line-height:1.1;font-weight:800;letter-spacing:-.025em;margin:0 0 1rem;color:#fafafa}
+@media(min-width:640px){.pm-title{font-size:2.25rem}}
+@media(min-width:768px){.pm-title{font-size:2.75rem}}
+@media(min-width:1024px){.pm-title{font-size:3.5rem}}
+.pm-subtitle{color:#a1a1aa;font-size:1rem;line-height:1.6;margin:0;padding:0 1rem}
+@media(min-width:640px){.pm-subtitle{font-size:1.125rem}}
+@media(min-width:768px){.pm-subtitle{font-size:1.25rem;padding:0}}
+.pm-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:.875rem}
+.pm-card{flex:0 1 calc(50% - .4375rem);position:relative;background:rgba(9,9,11,.7);border:1px solid rgba(247,50,52,.18);border-radius:1rem;padding:1.75rem 1.25rem;display:flex;flex-direction:column;align-items:center;gap:.875rem;text-align:center;transition:all .35s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(12px)}
+@media(min-width:640px){.pm-grid{gap:1rem}.pm-card{flex:0 1 calc(33.333% - .666rem)}}
+@media(min-width:1024px){.pm-grid{gap:1.25rem}.pm-card{flex:0 1 calc(25% - .9375rem)}}
+.pm-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(247,50,52,.04) 0%,transparent 60%);opacity:0;transition:opacity .35s;pointer-events:none;border-radius:1rem}
+.pm-card:hover{transform:translateY(-4px);border-color:rgba(247,50,52,.4);background:rgba(9,9,11,.85)}
+.pm-card:hover::before{opacity:1}
+.pm-icon{width:3.5rem;height:3.5rem;display:flex;align-items:center;justify-content:center;background:rgba(247,50,52,.12);border:1px solid rgba(247,50,52,.25);border-radius:.75rem;color:#F73234;font-size:1.75rem;transition:all .35s}
+.pm-card:hover .pm-icon{background:rgba(247,50,52,.22);border-color:rgba(247,50,52,.45);transform:scale(1.08)}
+.pm-name{font-size:.9375rem;font-weight:700;color:#fafafa;margin:0;line-height:1.3;transition:color .25s}
+.pm-card:hover .pm-name{color:#F73234}
+@media(max-width:639px){.pm-card{padding:1.5rem 1rem}.pm-icon{width:3rem;height:3rem;font-size:1.5rem}.pm-name{font-size:.875rem}}
+@media(prefers-reduced-motion:reduce){.pm-card,.pm-icon,.pm-name{transition:none;animation:none}.pm-card:hover{transform:none}}
+</style>
+<!-- designed by https://theme.mysellauth.com/ -->

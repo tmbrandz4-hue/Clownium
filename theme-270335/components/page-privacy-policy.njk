@@ -1,0 +1,16 @@
+<section id="{{ componentId }}" class="component sa-page-privacy-policy py-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    {% render_snippet "section-header.njk",
+      header_headline=properties.headline,
+      header_title=properties.title,
+      header_subtitle=properties.subtitle,
+      header_align=properties.header_align,
+      header_size='h1'
+    %}
+    <div class="max-w-3xl {{ 'mx-auto' if (properties.header_align if properties.header_align else 'center') == 'center' }} {{ 'rounded-card border border-theme bg-surface shadow-card p-card sm:p-8' if properties.card_background != false }}" data-dsr>
+      <div class="sa-page-privacy-policy-body editor text-t-primary leading-relaxed">
+        {{ privacy_policy | safe }}
+      </div>
+    </div>
+  </div>
+</section>

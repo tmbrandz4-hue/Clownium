@@ -1,0 +1,55 @@
+{#
+  Group products modal. Args: group.
+  Requires openGroupModalId/closeGroupModal on an ancestor x-data.
+  Card layout follows global group_modal_product_card_type (list | grid).
+#}
+{% set _modalGrid = (global.properties.group_modal_product_card_type if global.properties.group_modal_product_card_type else 'grid') != 'list' %}
+<div x-cloak x-show="openGroupModalId == '{{ group.id }}'" class="sa-group-modal fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-label="{{ group.name }}">
+  <div class="flex items-end justify-center min-h-screen px-2 text-center md:items-center sm:p-0">
+    <div
+      @click="closeGroupModal"
+      x-show="openGroupModalId == '{{ group.id }}'"
+      x-transition:enter="transition ease-out duration-theme"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="transition ease-in duration-150"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+      class="fixed inset-0 transition-opacity"
+      style="background-color: var(--cl-overlay);"
+      aria-hidden="true"
+    ></div>
+
+    <div
+      x-show="openGroupModalId == '{{ group.id }}'"
+      x-transition:enter="transition ease-out duration-200 transform"
+      x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+      x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+      x-transition:leave="transition ease-in duration-150 transform"
+      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+      class="inline-block w-full p-4 my-16 overflow-hidden text-left align-middle transition-all transform border border-theme rounded-card bg-surface shadow-modal sm:p-6 {{ 'max-w-full lg:max-w-6xl' if _modalGrid else 'max-w-xl lg:max-w-2xl' }}"
+    >
+      <div class="flex items-start justify-between gap-4 mb-5">
+        <h3 class="text-h4 font-heading text-t-primary truncate">{{ group.name }}</h3>
+        <button @click="closeGroupModal" class="text-t-muted hover:text-t-primary transition-colors duration-theme" aria-label="{{ 'common.close' | t }}">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      {% if _modalGrid %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-grid-gap">
+          {% for product in group.products %}
+            {% render_snippet "product-card.njk", product=product, card_style='flat-divider', badge_position='top-right', show_status=properties.show_status, card_subtext=properties.card_subtext, price_format=properties.price_format %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="flex flex-col gap-3">
+          {% for product in group.products %}
+            {% render_snippet "product-card-horizontal.njk", product=product, show_status=properties.show_status, card_subtext=properties.card_subtext, price_format=properties.price_format %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

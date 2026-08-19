@@ -1,0 +1,6 @@
+{# Per-section decorative background (bg_effect property). Parent section must be relative. #}
+{% if sfx_effect == 'grid' or sfx_effect == 'dots' %}
+  <div class="sfx" aria-hidden="true">
+    <div class="pfx-pattern pfx-pattern-{{ sfx_effect }}"></div>
+  </div>
+{% endif %}

@@ -1,0 +1,94 @@
+<div class="container component" data-component-id="{{ componentId }}">
+  <section class="py-5-nav">
+
+    <div class="mb-4">
+      <h1 class="fw-bold mb-0" style="font-size:1.75rem">My Account</h1>
+      <small style="color:#9ab0cf">{{ shop_customer.email }}</small>
+    </div>
+
+    <div class="row">
+      <div class="col-12 col-lg-3 mb-4">
+        {% render_snippet "customer-sidebar.njk" %}
+      </div>
+      <div class="col-12 col-lg-9">
+        <div class="cl-dash-card p-4">
+          <h5 class="fw-semibold mb-3">Orders</h5>
+          <div class="table-responsive">
+            <table class="table cl-table">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>ID</th>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if invoices.data.length > 0 %}
+                  {% for invoice in invoices.data %}
+                    <tr>
+                      <td>
+                        <span class="badge {% if invoice.status == 'completed' %}bg-success{% elif invoice.status == 'pending' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                          {{ invoice.status }}
+                        </span>
+                        <br>
+                        <small style="color:#9ab0cf">{{ invoice.created_at | formatDate }}</small>
+                      </td>
+                      <td>
+                        <a href="{{ invoice.url }}" target="_blank" style="color:#3b82f6">#{{ invoice.unique_id }}</a>
+                      </td>
+                      <td>
+                        {% if invoice.items %}
+                          {{ invoice.items[0].product.name }}
+                          {% if invoice.items[0].variant and invoice.items[0].product.name != invoice.items[0].variant.name %}
+                            ({{ invoice.items[0].variant.name }})
+                          {% endif %}
+                          {% if invoice.items.length > 1 %}
+                            &amp; {{ invoice.items.length - 1 }} more
+                          {% endif %}
+                        {% else %}
+                          Deleted Product
+                        {% endif %}
+                      </td>
+                      <td>{{ formatPrice(invoice.price, invoice.currency) }}</td>
+                      <td>
+                        {% if shop.tickets_enabled %}
+                          {% if invoice.ticket %}
+                            <a href="{{ ('/customer/tickets/' ~ invoice.ticket.id) | shopUrl }}" class="cl-dash-btn-outline btn btn-sm">
+                              View Ticket
+                            </a>
+                          {% else %}
+                            <button type="button" x-on:click="appTickets.modalOpen('{{ invoice.unique_id }}')" class="cl-dash-btn-outline btn btn-sm">
+                              Open Ticket
+                            </button>
+                          {% endif %}
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="5" class="text-center py-4" style="color:#9ab0cf">No orders yet.</td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if invoices.last_page > 1 %}
+            {% render_snippet "pagination.njk", paginator=invoices %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="components">
+  {% for componentId in components_order %}
+    {% render_component componentId %}
+  {% endfor %}
+</div>
+
+{% render_snippet "ticket-create-modal.njk" %}

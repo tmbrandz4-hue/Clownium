@@ -1,0 +1,70 @@
+{#
+  Product page gallery.
+  Args: gallery_style ('bottom' thumbs below · 'side' thumbs left · 'stacked' all images · 'single').
+  Splide main carousel is initialized by product-page.njk's load script for bottom/side.
+#}
+{% set _gStyle = gallery_style if gallery_style else 'bottom' %}
+{% set _gImages = product.image_urls if product.image_urls | length else ([product.image_url] if product.image_url else []) %}
+
+{% if _gImages | length == 0 %}
+  <div class="sa-product-gallery sa-product-gallery--empty flex items-center justify-center w-full aspect-product-page-image border border-theme bg-accent-500/5 rounded-card">
+    <span class="flex items-center justify-center size-20 rounded-card bg-accent-500/10 text-accent-500">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    </span>
+  </div>
+{% elif _gStyle == 'stacked' %}
+  <div class="sa-product-gallery sa-product-gallery--stacked flex flex-col gap-4">
+    {% for image in _gImages %}
+      <img src="{{ image }}" alt="{{ product.name }}" class="w-full rounded-card border border-theme object-product-image zoomable {{ 'aspect-product-page-image' if loop.first }}" {% if not loop.first %}loading="lazy"{% endif %} />
+    {% endfor %}
+  </div>
+{% elif _gStyle == 'single' or _gImages | length == 1 %}
+  <img src="{{ _gImages[0] }}" alt="{{ product.name }}" class="sa-product-gallery sa-product-gallery--single w-full aspect-product-page-image rounded-card border border-theme object-product-image zoomable" />
+{% elif _gStyle == 'side' %}
+  <div class="sa-product-gallery sa-product-gallery--side flex gap-3">
+    <div class="hidden sm:flex flex-col gap-2 w-20 shrink-0">
+      {% for image in _gImages %}
+        <button type="button" onclick="window.splideMain && window.splideMain.go({{ loop.index0 }})" class="rounded-input border border-theme overflow-hidden opacity-60 hover:opacity-100 transition-opacity duration-theme aspect-square">
+          <img src="{{ image }}" alt="" class="size-full object-cover" loading="lazy" />
+        </button>
+      {% endfor %}
+    </div>
+    <div class="splide main flex-1 min-w-0">
+      <div class="splide__track aspect-product-page-image rounded-card border border-theme overflow-hidden">
+        <ul class="splide__list">
+          {% for image in _gImages %}
+            <li class="splide__slide bg-t-primary/5 aspect-product-page-image">
+              <img src="{{ image }}" class="size-full object-product-image" style="{{ 'display: none;' if loop.index > 1 }}" />
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="sa-product-gallery sa-product-gallery--bottom splide main">
+    <div class="splide__track aspect-product-page-image rounded-card border border-theme overflow-hidden">
+      <ul class="splide__list">
+        {% for image in _gImages %}
+          <li class="splide__slide bg-t-primary/5 aspect-product-page-image">
+            <img src="{{ image }}" class="size-full object-product-image" style="{{ 'display: none;' if loop.index > 1 }}" />
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  {% if _gImages | length > 1 %}
+    <div class="splide thumbnails mt-3 max-h-[3.375rem] md:max-h-[4.5rem]">
+      <div class="splide__track">
+        <ul class="splide__list">
+          {% for image in _gImages %}
+            <li class="splide__slide !border !border-theme rounded-input opacity-50 overflow-hidden bg-t-primary/5">
+              <img src="{{ image }}" class="size-full object-product-image" />
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+{% endif %}

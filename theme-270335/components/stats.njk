@@ -1,0 +1,51 @@
+{% set _sVariant = properties.variant if properties.variant else 'row' %}
+
+{% macro statValue(stat) %}
+  {% set _statValue = stat.value | renderString %}
+  <span class="text-h2 font-heading text-t-primary">{{ _statValue }}</span>
+{% endmacro %}
+
+<section id="{{ componentId }}" class="component sa-stats sa-stats--{{ _sVariant }} py-section {{ 'relative' if properties.bg_effect and properties.bg_effect != 'none' }}" data-component-id="{{ componentId }}">
+  {% render_snippet "section-fx.njk", sfx_effect=properties.bg_effect %}
+  <div class="wrap">
+    {% render_snippet "section-header.njk",
+      header_headline=properties.headline,
+      header_title=properties.title,
+      header_subtitle=properties.subtitle,
+      header_align=properties.header_align,
+      header_highlight=properties.title_highlight
+    %}
+
+    {% if _sVariant == 'cards' %}
+      {% set _statCols = {'1': 'sm:grid-cols-1', '2': 'sm:grid-cols-2', '3': 'sm:grid-cols-3'}[properties.stats | length] or 'sm:grid-cols-2 lg:grid-cols-4' %}
+      <div class="sa-stats-items grid grid-cols-1 {{ _statCols }} gap-grid-gap">
+        {% for stat in properties.stats %}
+          <div class="sa-stats-item rounded-card border border-theme bg-surface shadow-card p-card text-center" data-dsr>
+            {{ statValue(stat) }}
+            <p class="text-sm text-t-muted mt-1">{{ stat.title | renderString }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% elif _sVariant == 'inline' %}
+      <div class="sa-stats-items flex flex-wrap items-center justify-center gap-x-10 gap-y-4" data-dsr>
+        {% for stat in properties.stats %}
+          <div class="sa-stats-item flex items-baseline gap-2">
+            {{ statValue(stat) }}
+            <span class="text-sm text-t-muted">{{ stat.title | renderString }}</span>
+          </div>
+          {% if not loop.last %}<span class="hidden sm:block w-px h-8 bg-t-primary/10" aria-hidden="true"></span>{% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      {% set _statCols = {'1': 'sm:grid-cols-1', '2': 'sm:grid-cols-2', '3': 'sm:grid-cols-3'}[properties.stats | length] or 'sm:grid-cols-2 lg:grid-cols-4' %}
+      <div class="sa-stats-items rounded-card border border-theme bg-surface shadow-card divide-y sm:divide-y-0 sm:divide-x divide-theme grid grid-cols-1 {{ _statCols }}" data-dsr>
+        {% for stat in properties.stats %}
+          <div class="sa-stats-item p-card text-center">
+            {{ statValue(stat) }}
+            <p class="text-sm text-t-muted mt-1">{{ stat.title | renderString }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>

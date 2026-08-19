@@ -1,0 +1,19 @@
+{% set _align = properties.header_align if properties.header_align else 'center' %}
+{% set _title = properties.title if properties.title else custom_page.name %}
+{% set _hl = properties.title_highlight if (properties.title_highlight and properties.title_highlight != 'inherit') else (global.properties.title_highlight if global.properties.title_highlight else 'accent') %}
+
+<section id="{{ componentId }}" class="component sa-custom-page-heading pt-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    <div class="max-w-2xl {{ {'center': 'mx-auto text-center', 'right': 'ml-auto text-right', 'left': 'text-left'}[_align] or 'mx-auto text-center' }}" data-dsr>
+      {% if properties.headline %}
+        <p class="sa-custom-page-heading-eyebrow text-sm font-semibold text-accent-500 mb-2">{{ properties.headline | renderString }}</p>
+      {% endif %}
+      {% if _title %}
+        <h1 class="sa-custom-page-heading-title text-h1 font-heading text-t-primary text-balance {% if _hl != 'none' %}hl-{{ _hl }}{% endif %}">{{ _title | renderString | markup }}</h1>
+      {% endif %}
+      {% if properties.subtitle %}
+        <p class="sa-custom-page-heading-subtitle mt-3 text-t-muted">{{ properties.subtitle | renderString }}</p>
+      {% endif %}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,42 @@
+{#
+  Card media block shared by all product card styles.
+  Args: product, media_rounded (extra rounding classes),
+        badge_position ('top-left'|'top-right'|'none').
+#}
+{% set _isGroup = product.type == 'group' %}
+{% set _aspect = 'aspect-group-card-image object-group-image' if _isGroup else 'aspect-product-card-image object-product-image' %}
+{% set _images = product.image_urls if product.image_urls | length else ([product.image_url] if product.image_url else []) %}
+
+<div class="sa-product-card-media relative overflow-hidden {{ media_rounded if media_rounded else '' }}">
+  {% if _images | length == 0 %}
+    <div class="flex justify-center items-center bg-accent-500/5 {{ 'aspect-group-card-image' if _isGroup else 'aspect-product-card-image' }}">
+      <span class="flex items-center justify-center size-14 rounded-input bg-accent-500/10 text-accent-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      </span>
+    </div>
+  {% else %}
+    <img src="{{ _images[0] }}" alt="{{ product.name }}" class="w-full {{ _aspect }} transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
+  {% endif %}
+
+  {% if badge_position != 'none' and product.product_badges.card | length > 0 %}
+    {% set _badgeStyle = global.properties.badge_style if global.properties.badge_style else 'tinted' %}
+    <div class="absolute top-2 {{ 'left-2' if badge_position == 'top-left' else 'right-2' }} flex items-center gap-1.5 flex-wrap max-w-[calc(100%-1rem)] {{ 'justify-start' if badge_position == 'top-left' else 'justify-end' }}">
+      {% for productBadge in product.product_badges.card %}
+        {% if _badgeStyle == 'solid' %}
+          <span class="inline-flex items-center gap-1.5 bg-accent-500 text-on-accent text-xs font-semibold px-2 py-1 rounded-badge" {% if productBadge.color %}style="background-color: {{ productBadge.color }}"{% endif %}>
+            {% if productBadge.icon %}<i class="{{ productBadge.icon }} fa-fw" aria-hidden="true"></i>{% endif %}
+            {{ productBadge.label }}
+          </span>
+        {% else %}
+          <span
+            class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-badge border backdrop-blur-sm {{ 'bg-accent-500/15 text-accent-400 border-accent-500/30' if not productBadge.color }}"
+            {% if productBadge.color %}style="color: {{ productBadge.color }}; background-color: {{ productBadge.color }}1f; border-color: {{ productBadge.color }}40;"{% endif %}
+          >
+            {% if productBadge.icon %}<i class="{{ productBadge.icon }} fa-fw" aria-hidden="true"></i>{% endif %}
+            {{ productBadge.label }}
+          </span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

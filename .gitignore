@@ -1,0 +1,39 @@
+# Secrets — NEVER commit
+AGENTS.md
+config.local.json
+vercel-theme/config.local.json
+
+# Build output / deps
+node_modules/
+vercel-theme/node_modules/
+vercel-theme/dist/
+
+# Local working copies / generated packages (rebuilt from overrides)
+vercel-theme/themes/
+theme-clownium/
+
+# Old / unrelated working folders
+site/
+SellAuth/
+landing/
+
+# Scratch files at repo root
+/New Project1.png
+/abstract-dark-blue-wavy-wave-background-with-lines-design-ai-generate-photo.jpg
+/openapi.yaml
+/chrome-errors.log
+/portal-dump.html
+/nebular-oblique-regular.ttf
+/SFPRODISPLAY*.OTF
+
+# Scratch files inside vercel-theme
+vercel-theme/*.html
+vercel-theme/*.png
+vercel-theme/chrome-errors.log
+vercel-theme/live-otp-src.html
+vercel-theme/test-*.mjs
+vercel-theme/inspect.mjs
+vercel-theme/make-probe.mjs
+vercel-theme/make-test.mjs
+vercel-theme/shot.mjs
+vercel-theme/serve.mjs

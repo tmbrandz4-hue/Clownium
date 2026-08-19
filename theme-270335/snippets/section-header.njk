@@ -1,0 +1,37 @@
+{#
+  Shared section header.
+  Args: header_title, header_headline (eyebrow), header_subtitle,
+        header_align ('left'|'center'|'right', default 'center'),
+        header_highlight (per-component override; 'inherit' or empty uses the global title_highlight),
+        header_size ('display'|'h1'|'h2', default 'h2')
+#}
+{% if header_title or header_headline or header_subtitle %}
+  {% set _align = header_align if header_align else 'center' %}
+  {% set _size = header_size if header_size else 'h2' %}
+  {% set _hl = header_highlight if (header_highlight and header_highlight != 'inherit') else (global.properties.title_highlight if global.properties.title_highlight else 'accent') %}
+
+  <div
+    class="sa-section-header section-header max-w-2xl mb-10 {{ {'center': 'mx-auto text-center', 'right': 'ml-auto text-right', 'left': 'text-left'}[_align] or 'mx-auto text-center' }}"
+    data-dsr
+  >
+    {% if header_headline %}
+      {% set _eyebrowStyle = global.properties.eyebrow_style if global.properties.eyebrow_style else 'text' %}
+      {% if _eyebrowStyle == 'pill' %}
+        <p class="sa-section-eyebrow inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-badge border border-theme bg-t-primary/[0.03] text-xs font-medium text-t-muted">
+          <span class="size-1.5 rounded-full bg-accent-500" aria-hidden="true"></span>
+          {{ header_headline | renderString }}
+        </p>
+      {% else %}
+        <p class="sa-section-eyebrow text-sm font-semibold text-accent-500 mb-2">{{ header_headline | renderString }}</p>
+      {% endif %}
+    {% endif %}
+
+    {% if header_title %}
+      <h2 class="sa-section-title {{ {'display': 'text-display', 'h1': 'text-h1', 'h2': 'text-h2'}[_size] or 'text-h2' }} font-heading text-t-primary text-balance {% if _hl != 'none' %}hl-{{ _hl }}{% endif %}">{{ header_title | renderString | markup }}</h2>
+    {% endif %}
+
+    {% if header_subtitle %}
+      <p class="sa-section-subtitle mt-3 text-t-muted">{{ header_subtitle | renderString }}</p>
+    {% endif %}
+  </div>
+{% endif %}

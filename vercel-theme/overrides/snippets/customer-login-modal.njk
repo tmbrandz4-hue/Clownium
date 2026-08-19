@@ -1,0 +1,293 @@
+<div class="modal fade" id="customer-login-modal" tabindex="-1" aria-labelledby="customer-login-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="customer-login-modal-label">Log in to Your Customer Account</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div x-show="appCustomer.modalStep === 1">
+          <form @submit.prevent="appCustomer.modalRequestOtp()">
+            <div class="mb-1">
+              <label class="mb-0 form-label">E-mail Address</label>
+              <small class="d-block form-text">We'll send you a one-time password to this email address.</small>
+            </div>
+            <div class="mt-2">
+              <input
+                type="email"
+                x-model="appCustomer.modalEmail"
+                x-ref="appCustomer.modalEmailInput"
+                placeholder="name@domain.com"
+                class="form-control"
+              />
+            </div>
+
+            {% if altcha_shop_customer %}
+            {# ── SELLAUTH STOREFRONT ──────────────────────────────────────────────
+               Use the real altcha-widget with auto="onload" so it solves automatically
+               the moment the modal opens. script.js addAltchaEventListener() fires
+               statechange → sets appCustomer.altchaPayload reactively.
+               We overlay our custom checkbox on top purely for visual style — it shows
+               "Verifying..." while the widget works, then "Verified" when done. #}
+            <div style="position:relative">
+              {# Hidden widget — auto-solves, fires statechange #}
+              <div style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;overflow:hidden">
+                <altcha-widget
+                  challengejson='{{ altcha_shop_customer | json }}'
+                  auto="onload"
+                  hidefooter="true"
+                  hidelogo="true"
+                  x-ref="appCustomer.altcha"
+                ></altcha-widget>
+              </div>
+              {# Visible custom checkbox — purely cosmetic, reflects altchaPayload state #}
+              <div
+                id="cl-captcha"
+                class="cl-captcha mt-2"
+                :class="{ 'loading': !appCustomer.altchaPayload, 'done': !!appCustomer.altchaPayload }"
+                aria-checked="false"
+              >
+                <span class="cl-captcha-box">
+                  <svg class="cl-captcha-check" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M9 16.2l-3.5-3.5L4 14.2l5 5L20 8.2 18.5 6.7z"/></svg>
+                </span>
+                <span class="cl-captcha-label"></span>
+                <span class="cl-captcha-spinner"></span>
+              </div>
+            </div>
+            {% else %}
+            {# ── VERCEL STATIC BUILD ─────────────────────────────────────────────
+               No server-side challenge. Custom checkbox fetches /api/altcha on click,
+               solves POW in-browser, then sets altchaPayload via Alpine x-on handler. #}
+            <div
+              id="cl-captcha"
+              class="cl-captcha mt-2"
+              role="button"
+              tabindex="0"
+              aria-checked="false"
+              x-on:cl-verified.window="appCustomer.altchaPayload = $event.detail; $el.classList.remove('loading'); $el.classList.add('done')"
+              x-on:cl-reset.window="appCustomer.altchaPayload = null; $el.classList.remove('loading','done')"
+            >
+              <span class="cl-captcha-box">
+                <svg class="cl-captcha-check" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M9 16.2l-3.5-3.5L4 14.2l5 5L20 8.2 18.5 6.7z"/></svg>
+              </span>
+              <span class="cl-captcha-label"></span>
+              <span class="cl-captcha-spinner"></span>
+            </div>
+            {% endif %}
+
+            <p x-show="appCustomer.modalEmailError" class="form-text text-danger mt-2 mb-0" x-text="appCustomer.modalEmailError"></p>
+            <button
+              type="submit"
+              class="btn cl-modal-btn mt-3 w-100"
+              :disabled="appCustomer.modalLoading || !appCustomer.altchaPayload"
+            >
+              <span x-show="!appCustomer.modalLoading">Continue</span>
+              <span x-show="appCustomer.modalLoading">Sending...</span>
+            </button>
+          </form>
+        </div>
+
+        <div x-show="appCustomer.modalStep === 2">
+          <form @submit.prevent="appCustomer.modalLogin()">
+            <div class="mb-1">
+              <label class="mb-0 form-label">One Time Password</label>
+              <small class="d-block form-text">A 6-digit code has been sent to <span x-text="appCustomer.modalEmail"></span>.</small>
+            </div>
+            <div class="d-flex gap-2 mt-2 justify-content-center">
+              {% for index in range(6) %}
+                <input
+                  type="text"
+                  maxlength="1"
+                  x-model="appCustomer.modalOtpDigits[{{ index }}]"
+                  x-ref="appCustomer.modalOtpInputs[{{ index }}]"
+                  @input="appCustomer.modalOtpHandleInput({{ index }})"
+                  @keydown="appCustomer.modalOtpHandleKeyDown({{ index }}, $event)"
+                  class="form-control text-center cl-otp-input"
+                />
+              {% endfor %}
+            </div>
+            <p x-show="appCustomer.modalOtpError" class="form-text text-danger mt-2 mb-0" x-text="appCustomer.modalOtpError"></p>
+            <button
+              type="submit"
+              class="btn cl-modal-btn mt-3 w-100"
+              :disabled="appCustomer.modalLoading"
+            >
+              <span x-show="!appCustomer.modalLoading">Log In</span>
+              <span x-show="appCustomer.modalLoading">Logging in...</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if not altcha_shop_customer %}
+<script>
+(function () {
+  async function solve(ch) {
+    var enc = new TextEncoder();
+    for (var n = 0; n <= (ch.maxnumber || 100000); n++) {
+      var buf = await crypto.subtle.digest('SHA-256', enc.encode(ch.salt + n));
+      var hex = '';
+      new Uint8Array(buf).forEach(function (b) { hex += b.toString(16).padStart(2, '0'); });
+      if (hex === ch.challenge) return n;
+    }
+    return -1;
+  }
+
+  var box = document.getElementById('cl-captcha');
+  var busy = false;
+
+  async function verify() {
+    if (!box || busy) return;
+    busy = true;
+    box.classList.add('loading');
+    window.dispatchEvent(new CustomEvent('cl-reset', { detail: null }));
+    try {
+      var res = await fetch('/api/altcha', { cache: 'no-store' });
+      if (!res.ok) throw new Error('challenge fetch failed ' + res.status);
+      var data = await res.json();
+      if (!data.challenge) throw new Error('no challenge in response');
+      var number = await solve(data.challenge);
+      if (number < 0) throw new Error('no solution found');
+      var payload = btoa(JSON.stringify({
+        algorithm: data.challenge.algorithm,
+        challenge: data.challenge.challenge,
+        number: number,
+        salt: data.challenge.salt,
+        signature: data.challenge.signature
+      }));
+      // Fire via window event — Alpine x-on:cl-verified.window handler sets altchaPayload
+      // reactively from inside Alpine's own context
+      window.dispatchEvent(new CustomEvent('cl-verified', { detail: payload }));
+    } catch (e) {
+      box.classList.remove('loading');
+      console.warn('captcha verify failed:', e);
+    }
+    busy = false;
+  }
+
+  if (box) {
+    box.addEventListener('click', function () {
+      if (!box.classList.contains('done')) verify();
+    });
+    box.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' || e.key === ' ') && !box.classList.contains('done')) {
+        e.preventDefault(); verify();
+      }
+    });
+  }
+
+  // Reset on every modal open so the captcha can be used again
+  document.addEventListener('shown.bs.modal', function (ev) {
+    if (!ev.target || ev.target.id !== 'customer-login-modal') return;
+    busy = false;
+    window.dispatchEvent(new CustomEvent('cl-reset', { detail: null }));
+  });
+
+  // Also reset when modal is dismissed (X, backdrop, Escape)
+  document.addEventListener('hidden.bs.modal', function (ev) {
+    if (!ev.target || ev.target.id !== 'customer-login-modal') return;
+    busy = false;
+    window.dispatchEvent(new CustomEvent('cl-reset', { detail: null }));
+  });
+
+  // Reset captcha after a failed OTP request (rate limit / too many codes)
+  // Patch runs after Alpine initialises so window.alpineApp exists
+  document.addEventListener('alpine:initialized', function () {
+    var app = window.alpineApp;
+    if (!app || !app.appCustomer) return;
+    var orig = app.appCustomer.modalRequestOtp.bind(app.appCustomer);
+    app.appCustomer.modalRequestOtp = async function () {
+      await orig();
+      if (app.appCustomer.modalStep === 1) {
+        app.appCustomer.altchaPayload = null;
+        window.dispatchEvent(new CustomEvent('cl-reset', { detail: null }));
+      }
+    };
+  });
+})();
+</script>
+{% endif %}
+
+<style>
+#customer-login-modal .modal-content{
+  --ink:#e6efff; --muted:#9ab0cf;
+  background:linear-gradient(180deg,#0b1526 0%,#08101e 100%);
+  border:1px solid rgba(120,180,255,.16);
+  border-radius:18px;
+  color:var(--ink);
+  box-shadow:0 24px 60px rgba(0,10,30,.6), 0 0 0 1px rgba(0,0,0,.4);
+}
+#customer-login-modal .modal-header{
+  border-bottom:1px solid rgba(120,180,255,.12);
+}
+#customer-login-modal .modal-title{
+  font-weight:800; letter-spacing:.02em;
+}
+#customer-login-modal .form-label{
+  color:var(--ink); font-weight:700;
+}
+#customer-login-modal .form-text{
+  color:var(--muted);
+}
+#customer-login-modal .form-control{
+  background:#070a10;
+  border:1px solid rgba(160,200,255,.14);
+  color:#eaf2ff;
+  font-weight:600;
+  border-radius:10px;
+  padding:.65rem .85rem;
+}
+#customer-login-modal .form-control:focus{
+  background:#0a0f18;
+  border-color:rgba(120,180,255,.5);
+  box-shadow:0 0 0 3px rgba(33,150,243,.2);
+  color:#fff;
+}
+#customer-login-modal .form-control::placeholder{ color:#6f8bb8 }
+#customer-login-modal .cl-modal-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:.8rem 1.4rem; border-radius:12px; border:0;
+  font-weight:800; color:#041224; text-decoration:none;
+  background:linear-gradient(90deg,#1d4ed8,#3b82f6);
+  box-shadow:0 10px 26px rgba(0,90,255,.35);
+  transition:transform .16s ease, box-shadow .2s ease;
+}
+#customer-login-modal .cl-modal-btn:hover{ transform:translateY(-1px); box-shadow:0 14px 30px rgba(0,90,255,.5) }
+#customer-login-modal .cl-modal-btn:disabled{ opacity:.65 }
+#customer-login-modal .cl-otp-input{
+  width:2.75rem; height:3.1rem; font-size:1.25rem; text-align:center;
+}
+#customer-login-modal .cl-captcha{
+  display:flex; align-items:center; gap:.6rem;
+  max-width:280px; margin:0;
+  padding:.6rem .75rem;
+  background:#0a0f18; border:1px solid rgba(160,200,255,.2); border-radius:10px;
+  cursor:pointer; user-select:none;
+  color:var(--ink); font-size:.88rem; font-weight:600;
+  transition:border-color .2s ease, background .2s ease;
+}
+#customer-login-modal .cl-captcha:hover{ border-color:rgba(120,180,255,.45) }
+#customer-login-modal .cl-captcha-box{
+  width:22px; height:22px; flex:0 0 auto;
+  border:2px solid #6f8bb8; border-radius:5px;
+  display:inline-flex; align-items:center; justify-content:center;
+  color:transparent;
+  transition:all .2s ease;
+}
+#customer-login-modal .cl-captcha-check{ display:block }
+#customer-login-modal .cl-captcha.done .cl-captcha-box{ border-color:#22c55e; background:#22c55e; color:#041224 }
+#customer-login-modal .cl-captcha-label::before{ content:"I'm not a robot" }
+#customer-login-modal .cl-captcha.loading .cl-captcha-label::before{ content:"Verifying..." }
+#customer-login-modal .cl-captcha.done .cl-captcha-label::before{ content:"Verified" }
+#customer-login-modal .cl-captcha-spinner{
+  display:none; width:18px; height:18px; flex:0 0 auto;
+  border:2px solid rgba(120,180,255,.3); border-top-color:#3b82f6; border-radius:50%;
+  animation:cl-captcha-spin .8s linear infinite;
+}
+#customer-login-modal .cl-captcha.loading .cl-captcha-spinner{ display:inline-block }
+#customer-login-modal .cl-captcha.loading .cl-captcha-box{ display:none }
+@keyframes cl-captcha-spin{ to{ transform:rotate(360deg) } }
+</style>

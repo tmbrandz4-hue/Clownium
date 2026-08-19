@@ -1,0 +1,259 @@
+{% set _cLayout = properties.layout if properties.layout else 'grid' %}
+{% set _cColumns = properties.columns if properties.columns else 3 %}
+{% set _cColClass = {'2': 'sm:grid-cols-2', '3': 'sm:grid-cols-2 xl:grid-cols-3', '4': 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}[_cColumns] or 'sm:grid-cols-2 xl:grid-cols-3' %}
+{% set _sidebar = properties.sidebar_position if properties.sidebar_position else 'left' %}
+{% set _hideFilters = properties.hide_filters %}
+{% set _activeFilterCount = (1 if filters.keyword else 0) + (1 if filters.price.from else 0) + (1 if filters.price.to else 0) + (1 if filters.in_stock else 0) + (1 if category else 0) %}
+
+{% macro filtersForm() %}
+  <form x-on:submit.prevent="submitForm">
+    {% if category_links | length %}
+      <div class="p-1">
+        <p class="flex items-center gap-1.5 px-1.5 mb-2 text-xs font-semibold uppercase tracking-wider text-t-muted">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+          {{ 'common.categories' | t }}
+        </p>
+        <nav class="flex flex-col gap-0.5">
+          <a href="{{ '/products' | shopUrl }}" class="sa-page-products-link flex items-center gap-2.5 rounded-btn px-2.5 py-2 text-sm font-medium transition-colors duration-theme {{ 'bg-accent-500/10 text-accent-500' if not category else 'text-t-muted hover:text-t-primary hover:bg-t-primary/[0.04]' }}" {% if not category %}aria-current="page"{% endif %}>
+            <span class="truncate">{{ 'header.all_categories' | t }}</span>
+          </a>
+          {% for cat in category_links %}
+            {% set _catActive = category and category.id == cat.id %}
+            <a href="{{ cat.url }}" class="sa-page-products-link flex items-center gap-2.5 rounded-btn px-2.5 py-2 text-sm font-medium transition-colors duration-theme {{ 'bg-accent-500/10 text-accent-500' if _catActive else 'text-t-muted hover:text-t-primary hover:bg-t-primary/[0.04]' }}" style="padding-left: {{ (cat.depth * 12 + 10) }}px" {% if _catActive %}aria-current="page"{% endif %}>
+              <span class="truncate">{{ cat.name }}</span>
+              {% if _catActive %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 ml-auto shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              {% endif %}
+            </a>
+          {% endfor %}
+        </nav>
+      </div>
+
+      <div class="border-t border-theme my-3"></div>
+    {% endif %}
+
+    <div class="p-1 space-y-4">
+      <div>
+        <label for="filters[keyword]" class="flex items-center gap-1.5 px-1.5 mb-2 text-xs font-semibold uppercase tracking-wider text-t-muted">
+          {{ 'common.keyword' | t }}
+        </label>
+        <div class="relative">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 absolute top-1/2 left-3 -translate-y-1/2 text-t-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input
+            type="text"
+            name="filters[keyword]"
+            id="filters[keyword]"
+            value="{{ filters.keyword }}"
+            placeholder="{{ 'products.search_placeholder' | t }}"
+            class="input pl-9"
+          />
+        </div>
+      </div>
+
+      <div>
+        <p class="flex items-center gap-1.5 px-1.5 mb-2 text-xs font-semibold uppercase tracking-wider text-t-muted">
+          {{ 'common.price' | t }}
+        </p>
+        <input type="hidden" name="filters[price][currency]" :value="appCurrency.currency" />
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="relative">
+            <input type="number" name="filters[price][from]" min="0" value="{{ filters.price.from }}" placeholder="{{ 'products.min' | t }}" class="input pr-8" />
+            <span class="absolute top-1/2 right-3 -translate-y-1/2 text-t-muted text-xs" x-text="window.currencySymbols[appCurrency.currency.toLowerCase()]"></span>
+          </div>
+          <div class="relative">
+            <input type="number" name="filters[price][to]" min="0" value="{{ filters.price.to }}" placeholder="{{ 'products.max' | t }}" class="input pr-8" />
+            <span class="absolute top-1/2 right-3 -translate-y-1/2 text-t-muted text-xs" x-text="window.currencySymbols[appCurrency.currency.toLowerCase()]"></span>
+          </div>
+        </div>
+      </div>
+
+      <label class="flex items-center gap-2.5 px-1.5 cursor-pointer select-none">
+        <input type="checkbox" name="filters[in_stock]" value="true" class="peer sr-only" {{ 'checked' if filters.in_stock }} />
+        <span class="size-4 shrink-0 rounded-[5px] border border-theme bg-transparent flex items-center justify-center text-on-accent transition-colors duration-theme peer-checked:bg-accent-500 peer-checked:border-accent-500 peer-focus-visible:ring-2 peer-focus-visible:ring-accent-500/30 [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-3 transition-opacity duration-theme" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+        <span class="text-sm font-medium text-t-primary">{{ 'products.in_stock_only' | t }}</span>
+      </label>
+    </div>
+
+    <div class="border-t border-theme my-3"></div>
+
+    <div class="p-1 space-y-1.5">
+      <button type="submit" class="flex items-center justify-center gap-2 w-full px-5 py-2.5 rounded-btn text-sm font-medium bg-accent-500 text-on-accent hover:bg-accent-600 transition-colors duration-theme shadow-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        {{ 'products.apply_filters' | t }}
+      </button>
+      <a href="{{ '/products' | shopUrl }}" class="flex items-center justify-center gap-2 w-full px-5 py-2 rounded-btn text-sm font-medium text-t-muted hover:text-t-primary hover:bg-t-primary/5 transition-colors duration-theme">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        {{ 'products.reset_filters' | t }}
+      </a>
+    </div>
+  </form>
+{% endmacro %}
+
+<section
+  id="{{ componentId }}"
+  class="component sa-page-products sa-page-products--{{ _cLayout }} py-section"
+  data-component-id="{{ componentId }}"
+  x-data="{
+    filtersModalOpen: false,
+    openGroupModalId: null,
+    openFilters() {
+      this.filtersModalOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+    closeFilters() {
+      this.filtersModalOpen = false;
+      document.body.style.removeProperty('overflow');
+    },
+    openGroupModal(id) {
+      this.openGroupModalId = id;
+      document.body.style.overflow = 'hidden';
+    },
+    closeGroupModal() {
+      this.openGroupModalId = null;
+      document.body.style.removeProperty('overflow');
+    },
+    submitForm(event) {
+      const form = event.target;
+      form.querySelectorAll('input, select, textarea').forEach((input) => {
+        if (!input.value) input.disabled = true;
+      });
+      form.submit();
+    }
+  }"
+>
+  <div class="wrap">
+    {% render_snippet "section-header.njk",
+      header_headline=properties.headline,
+      header_title=(properties.category_title if category else properties.default_title),
+      header_subtitle=(properties.category_subtitle if category else properties.default_subtitle),
+      header_align=properties.header_align,
+      header_size='h1'
+    %}
+
+    <div class="grid gap-6 lg:gap-8 items-start {{ '' if _hideFilters else ('lg:grid-cols-[minmax(0,1fr)_15rem]' if _sidebar == 'right' else 'lg:grid-cols-[15rem_minmax(0,1fr)]') }}">
+      {% if not _hideFilters %}
+        <aside class="hidden lg:block lg:sticky lg:top-24 {{ 'lg:order-2' if _sidebar == 'right' }}">
+          <div class="rounded-card border border-theme bg-surface shadow-card p-3">
+            {{ filtersForm() }}
+          </div>
+        </aside>
+      {% endif %}
+
+      <div class="min-w-0 {{ 'lg:order-1' if _sidebar == 'right' }}">
+        <div class="flex items-center justify-between gap-3 mb-4">
+          {% if not _hideFilters %}
+            <button type="button" @click="openFilters()" class="lg:hidden inline-flex items-center gap-2 px-3.5 py-2 rounded-btn text-sm font-medium border border-theme bg-surface shadow-card text-t-primary hover:bg-t-primary/5 transition-colors duration-theme">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              {{ 'products.filters' | t }}
+              {% if _activeFilterCount > 0 %}
+                <span class="inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-accent-500 text-on-accent text-xs font-semibold">{{ _activeFilterCount }}</span>
+              {% endif %}
+            </button>
+          {% endif %}
+          {% if items_paginator.total %}
+            <p class="text-sm text-t-muted ml-auto" data-dsr>
+              {{ items_paginator.total }} {{ 'product' if items_paginator.total == 1 else 'products' }}
+            </p>
+          {% endif %}
+        </div>
+
+        {% if items.length > 0 %}
+          {% if _cLayout == 'list' %}
+            <div class="sa-page-products-items flex flex-col gap-3">
+              {% for item in items %}
+                {% if item.type == 'group' or not item.group_id %}
+                  <div class="sa-page-products-item" data-dsr>
+                    {% render_snippet "product-card-horizontal.njk", product=item %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="sa-page-products-items grid grid-cols-1 {{ _cColClass }} gap-grid-gap">
+              {% for item in items %}
+                {% if item.type == 'group' or not item.group_id %}
+                  <div class="sa-page-products-item" data-dsr>
+                    {% render_snippet "product-card.njk", product=item, card_style=properties.card_style, badge_position=properties.badge_position, show_status=properties.show_status, card_subtext=properties.card_subtext, price_format=properties.price_format %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="rounded-card border border-theme bg-surface shadow-card text-center py-16 px-6" data-dsr>
+            <span class="size-12 mx-auto rounded-full bg-t-primary/5 text-t-muted flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </span>
+            <p class="font-medium text-t-primary">{{ 'products.none_found_short' | t }}</p>
+            <p class="text-sm text-t-muted mt-1">{{ 'products.no_results_hint' | t }}</p>
+            <a href="{{ '/products' | shopUrl }}" class="inline-flex items-center gap-2 mt-5 px-4 py-2 rounded-btn text-sm font-medium border border-theme text-t-primary hover:bg-t-primary/5 transition-colors duration-theme">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              {{ 'products.reset_filters' | t }}
+            </a>
+          </div>
+        {% endif %}
+
+        {% if items_paginator.last_page > 1 %}
+          <div class="mt-8">
+            {% render_snippet "pagination.njk", paginator=items_paginator %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Mobile filters — bottom sheet #}
+  {% if not _hideFilters %}
+  <div x-cloak x-show="filtersModalOpen" class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="{{ 'products.filters' | t }}" @keydown.escape.window="closeFilters()">
+    <div
+      x-show="filtersModalOpen"
+      x-transition:enter="transition ease-out duration-theme"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="transition ease-in duration-150"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+      @click="closeFilters()"
+      class="fixed inset-0"
+      style="background-color: var(--cl-overlay);"
+      aria-hidden="true"
+    ></div>
+    <div
+      x-show="filtersModalOpen"
+      x-transition:enter="transition ease-out duration-300 transform"
+      x-transition:enter-start="translate-y-full"
+      x-transition:enter-end="translate-y-0"
+      x-transition:leave="transition ease-in duration-200 transform"
+      x-transition:leave-start="translate-y-0"
+      x-transition:leave-end="translate-y-full"
+      class="fixed inset-x-0 bottom-0 max-h-[85dvh] flex flex-col rounded-t-card border-t border-theme bg-surface shadow-modal"
+    >
+      <div class="shrink-0 pt-3 px-4">
+        <div class="mx-auto w-10 h-1 rounded-full bg-t-primary/15" aria-hidden="true"></div>
+        <div class="flex items-center justify-between gap-3 py-3">
+          <h3 class="text-h4 font-heading text-t-primary inline-flex items-center gap-2">
+            {{ 'products.filters' | t }}
+            {% if _activeFilterCount > 0 %}
+              <span class="inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-accent-500/10 text-accent-500 text-xs font-semibold">{{ _activeFilterCount }}</span>
+            {% endif %}
+          </h3>
+          <button type="button" @click="closeFilters()" class="inline-flex items-center justify-center size-8 rounded-btn text-t-muted hover:text-t-primary hover:bg-t-primary/5 transition-colors duration-theme" aria-label="{{ 'common.close' | t }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        {{ filtersForm() }}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% for group in items %}
+    {% if group.type == 'group' %}
+      {% render_snippet "group-modal.njk", group=group %}
+    {% endif %}
+  {% endfor %}
+</section>

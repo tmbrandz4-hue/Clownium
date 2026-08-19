@@ -1,0 +1,30 @@
+{#
+  Breadcrumb trail above page content. Self-guards: renders nothing without a
+  platform-provided `breadcrumbs` var (or with a single crumb).
+  Globals: breadcrumbs_enabled (toggle), breadcrumbs_separator (chevron|slash|dot).
+#}
+{% if breadcrumbs and breadcrumbs | length > 1 and global.properties.breadcrumbs_enabled !== false %}
+  {% set _bcSep = global.properties.breadcrumbs_separator if global.properties.breadcrumbs_separator else 'chevron' %}
+  <nav aria-label="{{ 'common.breadcrumb' | t }}" class="sa-breadcrumbs wrap pt-6 -mb-4 relative z-[1]">
+    <ol class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-t-muted">
+      {% for crumb in breadcrumbs %}
+        <li class="flex items-center gap-x-1.5 min-w-0">
+          {% if not loop.first %}
+            {% if _bcSep == 'slash' %}
+              <span class="text-t-muted/50 select-none" aria-hidden="true">/</span>
+            {% elif _bcSep == 'dot' %}
+              <span class="text-t-muted/50 select-none" aria-hidden="true">·</span>
+            {% else %}
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-t-muted/60 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            {% endif %}
+          {% endif %}
+          {% if crumb.url %}
+            <a href="{{ crumb.url }}" class="truncate max-w-[12rem] hover:text-t-primary transition-colors duration-theme">{{ crumb.name }}</a>
+          {% else %}
+            <span aria-current="page" class="truncate max-w-[18rem] text-t-primary font-medium">{{ crumb.name }}</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  </nav>
+{% endif %}

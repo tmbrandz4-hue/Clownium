@@ -1,0 +1,60 @@
+<section id="{{ componentId }}" class="component sa-page-blog py-section" data-component-id="{{ componentId }}">
+  <div class="wrap">
+    {% render_snippet "section-header.njk",
+      header_headline=properties.headline,
+      header_title=properties.title,
+      header_subtitle=properties.subtitle,
+      header_align=properties.header_align,
+      header_size='h1'
+    %}
+
+    {% if blog_posts | length %}
+      {% if properties.enlarge_newest_post != false and blog_posts_paginator.current_page == 1 %}
+        {% set _newest = blog_posts[0] %}
+        <a href="{{ ('/blog/' + _newest.path) | shopUrl }}" class="sa-page-blog-item group flex flex-col md:flex-row rounded-card border border-theme bg-surface shadow-card overflow-hidden mb-6 {{ ('hfx-' + (global.properties.card_hover_effect or 'lift')) if (global.properties.card_hover_effect or 'lift') != 'none' }}" data-dsr>
+          <div class="md:w-1/2 border-b md:border-b-0 md:border-r border-theme">
+            {% if _newest.image_url %}
+              <img src="{{ _newest.image_url }}" alt="{{ _newest.title }}" class="w-full h-full aspect-blog-card-image md:aspect-auto object-cover" />
+            {% else %}
+              <div class="flex justify-center items-center bg-accent-500/5 aspect-blog-card-image h-full">
+                <span class="flex items-center justify-center size-14 rounded-input bg-accent-500/10 text-accent-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+                </span>
+              </div>
+            {% endif %}
+          </div>
+          <div class="md:w-1/2 p-6 sm:p-8 flex flex-col justify-center">
+            <p class="text-xs text-t-muted">{{ _newest.created_at | formatDate }}</p>
+            <h2 class="text-h3 font-heading text-t-primary mt-2 group-hover:text-accent-500 transition-colors duration-theme">{{ _newest.title }}</h2>
+            {% if _newest.summary %}
+              <p class="text-t-muted mt-3 line-clamp-3">{{ _newest.summary }}</p>
+            {% endif %}
+            <span class="inline-flex items-center gap-2 text-sm text-accent-500 mt-4">
+              {{ 'blog.read_post' | t }}
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </span>
+          </div>
+        </a>
+        {% set _rest = blog_posts.slice(1) %}
+      {% else %}
+        {% set _rest = blog_posts %}
+      {% endif %}
+
+      <div class="sa-page-blog-items grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-grid-gap">
+        {% for post in _rest %}
+          <div class="sa-page-blog-item" data-dsr>
+            {% render_snippet "blog-post-card.njk", post=post %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-center text-t-muted py-16">{{ 'blog.none' | t }}</p>
+    {% endif %}
+
+    {% if blog_posts_paginator.last_page > 1 %}
+      <div class="mt-8">
+        {% render_snippet "pagination.njk", paginator=blog_posts_paginator %}
+      </div>
+    {% endif %}
+  </div>
+</section>

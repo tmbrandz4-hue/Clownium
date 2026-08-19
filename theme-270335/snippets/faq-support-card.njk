@@ -1,0 +1,35 @@
+{#
+  "Still have questions?" support card shown under FAQ lists.
+  Args: sc_title, sc_text, sc_icon (fa classes), sc_cta_text, sc_cta_link.
+  External CTA links (http…) open in a new tab.
+#}
+{% if sc_title or sc_text or (sc_cta_text and sc_cta_link) %}
+  {% set _scExternal = sc_cta_link and sc_cta_link.startsWith('http') %}
+  <div class="sa-faq-support-card rounded-card border border-theme bg-surface shadow-card p-6 flex flex-col sm:flex-row sm:items-center gap-5" data-dsr>
+    <div class="flex items-start sm:items-center gap-4 flex-1 min-w-0">
+      {% if sc_icon %}
+        <span class="size-10 shrink-0 rounded-input bg-accent-500/10 text-accent-500 flex items-center justify-center">
+          <i class="{{ sc_icon }}" aria-hidden="true"></i>
+        </span>
+      {% endif %}
+      <div class="min-w-0">
+        {% if sc_title %}
+          <h3 class="sa-faq-support-card-title font-heading font-semibold text-t-primary">{{ sc_title | renderString }}</h3>
+        {% endif %}
+        {% if sc_text %}
+          <p class="text-sm text-t-muted mt-0.5">{{ sc_text | renderString }}</p>
+        {% endif %}
+      </div>
+    </div>
+    {% if sc_cta_text and sc_cta_link %}
+      <a
+        href="{{ sc_cta_link | shopUrl }}"
+        {% if _scExternal %}target="_blank" rel="noopener"{% endif %}
+        class="sa-faq-support-card-link shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium rounded-btn bg-accent-500 text-on-accent hover:bg-accent-600 shadow-btn transition-colors duration-theme"
+      >
+        {{ sc_cta_text }}
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    {% endif %}
+  </div>
+{% endif %}

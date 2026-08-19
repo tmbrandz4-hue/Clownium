@@ -1,0 +1,193 @@
+{# =========================
+   components/products.njk — Products grid (clean fragment)
+   ========================= #}
+{% set _title = (properties.title if properties.title else '') | renderString %}
+{% set _subtitle = (properties.subtitle if properties.subtitle else '') | renderString %}
+{% set _items = sortedItems if sortedItems is defined else (products if products is defined else []) %}
+{% if properties.ids and properties.ids | length > 0 %}
+  {% set _items = helpers.components.products.getItemsByIds(sortedItems, properties.ids) %}
+{% endif %}
+
+<section class="hb-products component" id="shop" data-component-id="{{ componentId }}" x-data="productsPage" x-init="hydrate()">
+  <div class="container">
+    {% if _title or _subtitle %}
+    <div class="section-head">
+      {% if _title %}<h2>{{ _title }}</h2>{% endif %}
+      {% if _subtitle %}<p class="lead">{{ _subtitle }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="toolbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14"/></svg>
+        <input type="search" x-model="filter" placeholder="Search products..." aria-label="Search products" />
+      </div>
+      <a href="{{ '/products' | shopUrl }}" class="btn btn-shop-all">
+        Shop All
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+      </a>
+    </div>
+
+    {% if categories | length > 0 %}
+    <div class="cat-row">
+      <button type="button" class="cat-pill {{ 'is-active' if not activeCategory }}" :class="{ 'is-active': !category }" @click="category = 0">All</button>
+      {% for cat in categories %}
+      <button type="button" class="cat-pill" :class="{ 'is-active': category == {{ cat.id }} }" @click="category = {{ cat.id }}">
+        {{ cat.name }}
+      </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row g-4 justify-content-center">
+      {% for product in _items %}
+      <div class="col-12 col-md-6 col-xl-4" x-show="isVisible({{ loop.index0 }})">
+        {% render_snippet "product-card.njk", product=product %}
+      </div>
+      {% endfor %}
+      <div x-cloak x-show="noResults" class="col-12 text-center text-muted py-5">
+        <p>No products match your filters.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hb-why component">
+  <div class="container">
+    <div class="section-head">
+      <h2>Why Choose <span class="grad">Clownium</span></h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="why-cell">
+          <i class="fa-solid fa-bolt"></i>
+          <h5>Instant Delivery</h5>
+          <p>Your product is delivered the moment payment is confirmed. No waiting.</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="why-cell">
+          <i class="fa-solid fa-shield-halved"></i>
+          <h5>Secure Checkout</h5>
+          <p>Payments are processed securely through our trusted provider.</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="why-cell">
+          <i class="fa-solid fa-headset"></i>
+          <h5>24/7 Support</h5>
+          <p>Our team is always around to help on Discord, day or night.</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="why-cell">
+          <i class="fa-solid fa-rotate-left"></i>
+          <h5>Money Back Guarantee</h5>
+          <p>If a product is defective, we make it right or refund you.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.hb-products{
+  padding: 5rem 0 2rem;
+}
+.hb-products .section-head{ text-align:center; margin-bottom:2.5rem }
+.hb-products .section-head h2{
+  font-weight:900; font-size:clamp(2rem,5vw,2.8rem); color:#fff;
+  text-shadow:0 0 24px rgba(0,110,255,.3);
+}
+.hb-products .section-head .lead{ color:#9ab0cf; max-width:560px; margin:.6rem auto 0 }
+.hb-products .toolbar{
+  display:flex; gap:.8rem; align-items:center; justify-content:center;
+  flex-wrap:wrap; margin-bottom:2rem;
+}
+.hb-products .search{
+  display:flex; align-items:center; gap:.5rem; min-width:260px;
+  padding:.55rem .9rem; border-radius:12px; background:#0a0d12;
+  border:1px solid rgba(160,200,255,.12);
+}
+.hb-products .search svg{ width:18px; height:18px; color:#6f8bb8 }
+.hb-products .search input{
+  background:transparent; border:0; outline:0; color:#eaf2ff; width:100%; font-weight:600;
+}
+.hb-products .btn-shop-all{
+  display:inline-flex; align-items:center; gap:.5rem; padding:.6rem 1.2rem;
+  border-radius:12px; font-weight:800; color:#fff; text-decoration:none;
+  background:linear-gradient(90deg,#1d4ed8,#3b82f6);
+  box-shadow:0 10px 26px rgba(0,90,255,.35), inset 0 1px 0 rgba(255,255,255,.3);
+  transition:transform .16s ease, box-shadow .2s ease;
+}
+.hb-products .btn-shop-all:hover{ transform:translateY(-2px); box-shadow:0 16px 34px rgba(0,90,255,.5) }
+
+.hb-products .cat-row{
+  display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; margin-bottom:2rem;
+}
+.hb-products .cat-pill{
+  padding:.5rem 1.1rem; border-radius:999px; font-weight:700; font-size:.85rem;
+  color:#c7d6f2; background:rgba(255,255,255,.03);
+  border:1px solid rgba(160,200,255,.14); cursor:pointer;
+  transition:transform .15s ease, background .2s ease, border-color .2s ease, color .2s ease;
+}
+.hb-products .cat-pill:hover{ transform:translateY(-1px); border-color:rgba(120,180,255,.35) }
+.hb-products .cat-pill.is-active{
+  color:#041224; background:linear-gradient(90deg,#1d4ed8,#3b82f6);
+  border-color:transparent; box-shadow:0 8px 20px rgba(0,90,255,.35);
+}
+
+.hb-why{ padding: 4rem 0 5rem }
+.hb-why .section-head{ text-align:center; margin-bottom:2.5rem }
+.hb-why .section-head h2{ font-weight:900; color:#fff; font-size:clamp(2rem,5vw,2.6rem) }
+.hb-why .section-head .grad{
+  background:linear-gradient(90deg,#3b82f6,#8ea0ff);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hb-why .why-cell{
+  height:100%; padding:1.6rem 1.4rem; border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+  border:1px solid rgba(160,200,255,.12);
+  box-shadow:0 16px 40px rgba(0,10,30,.5);
+  transition:transform .2s ease, border-color .2s ease;
+}
+.hb-why .why-cell:hover{ transform:translateY(-4px); border-color:rgba(120,180,255,.3) }
+.hb-why .why-cell i{
+  font-size:1.5rem; color:#5ea2ff; margin-bottom:.8rem;
+  filter:drop-shadow(0 0 10px rgba(59,130,246,.5));
+}
+.hb-why .why-cell h5{ font-weight:800; color:#fff; margin-bottom:.4rem }
+.hb-why .why-cell p{ color:#9ab0cf; font-size:.92rem; margin:0 }
+</style>
+
+<script>
+document.addEventListener('alpine:init', () => {
+  Alpine.data('productsPage', () => ({
+    filter: '',
+    category: 0,
+    catalog: [
+      {% for p in _items %}{ id: {{ p.id }}, name: {{ p.name | json }}, cat: {{ p.category_id or 0 }}, min: {{ p.min_price or 0 }}, max: {{ p.max_price or 0 }} },
+      {% endfor %}
+    ],
+    noResults: false,
+
+    hydrate() {
+      this.$watch('filter', () => this.refresh());
+      this.$watch('category', () => this.refresh());
+    },
+
+    refresh() {
+      this.noResults = !this.catalog.some((p, i) => this.isVisible(i));
+    },
+
+    isVisible(idx) {
+      const p = this.catalog[idx];
+      if (!p) return true;
+      const q = (this.filter || '').trim().toLowerCase();
+      if (q && !(p.name || '').toLowerCase().includes(q)) return false;
+      if (this.category && p.cat !== this.category) return false;
+      return true;
+    }
+  }));
+});
+</script>

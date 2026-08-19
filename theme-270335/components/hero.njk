@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      ✅ What changed (to fix unclickable group product cards):
+      1) REMOVED ScrollReveal's [data-dsr]{visibility:hidden} and the library init (hidden layers often block clicks).
+      2) Gave purely decorative absolute layers pointer-events:none and explicit z-index scoping so they never cover content.
+      3) Tightened z-index stacking: header at 20, hero decor below content, component content above decor.
+      4) Kept your design tokens/buttons but removed anything that could create invisible overlays.
+      5) Left i18n intact, but safe.
+    -->
+
+    <script>
+      // Active section highlighter (safe)
+      document.addEventListener("DOMContentLoaded", () => {
+        const sections = document.querySelectorAll("section[id]");
+        const navLinks = document.querySelectorAll(".nav-link");
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              const id = entry.target.getAttribute("id");
+              const link = document.querySelector(`.nav-link[href="#${id}"]`);
+              if (entry.isIntersecting) {
+                navLinks.forEach((l) => l.classList.remove("active"));
+                link?.classList.add("active");
+              }
+            });
+          },
+          { root: null, threshold: 0.6 }
+        );
+
+        sections.forEach((section) => observer.observe(section));
+      });
+    </script>
+
+    <title>{{ shop.name }}</title>
+    <meta
+      name="description"
+      content="At {{ shop.name }}, we know that those who resell our products want their customers to be satisfied, so at {{ shop.name }} we will strive to provide the best quality."
+    />
+
+    <link rel="icon" type="image/png" href="" />
+
+    <meta property="og:title" content="{{ shop.name }}" />
+    <meta
+      property="og:description"
+      content="At {{ shop.name }}, we know that those who resell our products want their customers to be satisfied, so at {{ shop.name }} we will strive to provide the best quality."
+    />
+    <meta property="og:image" content="" />
+    <meta name="twitter:title" content="{{ shop.name }}" />
+    <meta
+      name="twitter:description"
+      content="At {{ shop.name }}, we know that those who resell our products want their customers to be satisfied, so at {{ shop.name }} we will strive to provide the best quality."
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#0040ff" />
+
+    <link href="/assets/71057/built.css?v=1757077047708" rel="stylesheet" />
+    <link href="/assets/71057/custom.css?v=1753734754967" rel="stylesheet" />
+
+    <!-- NEW/CHANGED CSS (safe) -->
+    <style>
+      :root {
+        --brand-blue: #0018a8;
+        --brand-blue-rgb: 0, 24, 168;
+        --deep-blue: #001d3d;
+        --deep-black: #000814;
+      }
+
+      /* ensure rotating word is visible */
+      .typing-words { color: #fff !important; }
+
+      /* SOLID dark-blue pill (no outline) used in hero data text */
+      .pill-dark-blue {
+        background-color: var(--brand-blue) !important;
+        border: none !important;
+        color: #ffffff;
+      }
+
+      /* Badges */
+      .badge-dark-blue {
+        background-color: rgba(var(--brand-blue-rgb), 0.10) !important;
+        border: 1px solid rgba(var(--brand-blue-rgb), 0.60) !important;
+        color: #ffffff;
+      }
+      .badge-dark-blue:hover,
+      .badge-dark-blue:focus {
+        background-color: rgba(var(--brand-blue-rgb), 0.16) !important;
+        border-color: rgba(var(--brand-blue-rgb), 0.72) !important;
+      }
+
+      /* Primary CTA */
+      .btn-dark-blue {
+        background: linear-gradient(90deg, #0b1a49 0%, #1a3dd6 100%);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 24px rgba(26, 61, 214, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        transition: all 0.3s ease;
+      }
+      .btn-dark-blue:hover { opacity: 1; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(26, 61, 214, 0.35); }
+
+      /* Join Discord: black button with dark-blue outline */
+      .btn-black-outline-blue { background: #0a0a0a; color: #fff; border: 1px solid rgba(var(--brand-blue-rgb), 0.70); transition: all 0.2s ease-in-out; }
+      .btn-black-outline-blue:hover { background: #101010; border-color: rgba(var(--brand-blue-rgb), 0.90); }
+
+      /* Stats card gradient + border + soft glow */
+      .card-gradient {
+        background: linear-gradient(180deg, var(--deep-blue) 0%, var(--deep-black) 100%);
+        border: 1px solid rgba(0, 64, 255, 0.18);
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px rgba(0, 64, 255, 0.06) inset, 0 10px 30px rgba(0, 64, 255, 0.08);
+      }
+      .card-gradient::before {
+        content: "";
+        position: absolute;
+        inset: -40% -20% auto -20%;
+        height: 60%;
+        background: radial-gradient(60% 80% at 50% 0%, rgba(0, 64, 255, 0.15), transparent 60%);
+        pointer-events: none; /* never block */
+      }
+      .card-sheen { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(22,22,22,0.35), transparent); pointer-events: none; }
+
+      /* Global blue glows across the black background (outside hero) */
+      .glow-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(300px 300px at 10% 18%, rgba(0, 64, 255, 0.08), transparent 60%), radial-gradient(250px 250px at 82% 14%, rgba(0, 64, 255, 0.07), transparent 60%), radial-gradient(350px 350px at 18% 80%, rgba(0, 64, 255, 0.07), transparent 60%), radial-gradient(225px 225px at 74% 78%, rgba(0, 64, 255, 0.06), transparent 60%), radial-gradient(275px 275px at 50% 55%, rgba(0, 64, 255, 0.05), transparent 65%); mix-blend-mode: screen; }
+
+      /* keep app above the glow layer */
+      #app { position: relative; z-index: 1; }
+
+      /* NEW: make sure hero decorative absolute layers never eat clicks */
+      .decor-abs { position: absolute; inset: 0; pointer-events: none; }
+
+      /* NEW: establish clear stacking for main areas */
+      header { position: sticky; top: 0; z-index: 20; }
+      .components { position: relative; z-index: 10; }
+      /* If you render a modal elsewhere, give it z-index: 40+ */
+
+      /* REMOVE old [data-dsr] rule that hid elements and could block clicks */
+      /* [data-dsr] { visibility: hidden; }  <-- deleted on purpose */
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/dom-i18n@1.2.0/dist/dom-i18n.min.js" crossorigin="anonymous"></script>
+
+    <style id="translatable-styles">[data-translatable] { opacity: 0; }</style>
+
+    <script>
+      // i18n init (safe)
+      document.addEventListener("DOMContentLoaded", function () {
+        const lang = window.localStorage.getItem("language") || "en";
+        window.i18n = domI18n({ languages: ["en", "es"], currentLanguage: lang, defaultLanguage: "en" });
+        document.querySelectorAll(".language-button:not(." + lang + ")").forEach((obj) => obj.classList.add("opacity-50"));
+        // We can now show the translatable content
+        document.getElementById("translatable-styles")?.remove();
+      });
+      function setLanguage(lang) {
+        i18n.changeLanguage(lang);
+        window.localStorage.setItem("language", lang);
+        document.querySelectorAll(".language-button:not(." + lang + ")").forEach((obj) => obj.classList.add("opacity-50"));
+        document.querySelector(".language-button." + lang)?.classList.remove("opacity-50");
+      }
+    </script>
+
+    <!-- Removed ScrollReveal library & init entirely (prevent hidden overlays) -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" id="theme-font" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" rel="stylesheet" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.3/src/lite-yt-embed.css" rel="stylesheet" crossorigin="anonymous" />
+  
+    <style>
+      /* --- Modal layering fix --- */
+      .modal-root { position: fixed; inset: 0; z-index: 50; display: none; }
+      .modal-root[aria-modal="true"] { display: block; }
+      .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.6); z-index: 50; }
+      .modal-panel { position: relative; z-index: 51; pointer-events: auto; }
+      /* Ensure NO decorative layer can sit above modal */
+      .glow-layer, .decor-abs, .card-sheen, .card-gradient::before { z-index: 0 !important; }
+      /* Guard: never block clicks inside any component panels */
+      .component > * { pointer-events: auto; }
+      /* If any ancestor creates a stacking context (filter/transform), this keeps panels clickable */
+      [data-stacking-context-fix] { isolation: isolate; }
+    </style>
+  </head>
+
+  <body class="text-white bg-black">
+    <!-- Fixed glow layer for the rest of the page (non-blocking) -->
+    <div class="glow-layer" aria-hidden="true"></div>
+
+    <div class="flex flex-col justify-between min-h-screen relative" id="app" x-data="app">
+      <div>
+        <header>
+          <div class="announcement component hidden" data-component-id="announcement">
+            <div class="p-2 bg-accent-500 text-t-accent text-sm text-center relative z-30">
+              <!-- Safe placeholder without modulo 0 bug -->
+              <div class="overflow-hidden h-5"></div>
+            </div>
+          </div>
+        </header>
+
+        <div class="components">
+
+          <!-- HERO -->
+          <section id="hero" class="component" data-component-id="hero">
+            <!-- PATTERN over GRADIENT (only for hero) -->
+            <div
+              class="bg-repeat relative"
+              style="background-image: url('/assets/img/pattern.svg'), linear-gradient(180deg, #000814, #001d3d, #000); background-repeat: repeat, no-repeat; background-size: auto, cover; background-position: top left, center;"
+            >
+              <!-- Decorative grid columns (non-interactive) -->
+              <div class="decor-abs z-[1] w-full h-[600px] mx-auto flex justify-center items-stretch gap-8">
+                <div class="relative flex-1 flex justify-between items-start h-full" style="background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.02));">
+                  <div class="w-px h-full" style="background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.05));"></div>
+                  <div class="w-px h-full" style="background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.05));"></div>
+                </div>
+                <div class="relative flex-1 justify-between items-start h-full hidden md:flex" style="background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.02));">
+                  <div class="w-px h-full" style="background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.05));"></div>
+                  <div class="w-px h-full" style="background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.05));"></div>
+                </div>
+                <div class="relative flex-1 flex justify-between items-start h-full" style="background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.02));">
+                  <div class="w-px h-full" style="background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.05));"></div>
+                  <div class="w-px h-full" style="background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.05));"></div>
+                </div>
+                <!-- radial glow (non-interactive) -->
+                <div class="decor-abs z-[2] h-[720px]" style="background-image: radial-gradient(circle farthest-corner at 50% -40%, rgba(0, 64, 255, 0.35), rgba(5, 5, 5, 0) 68%);"></div>
+              </div>
+
+              <!-- Content always above decor, clickable -->
+              <div class="relative z-[3] max-w-7xl mx-auto flex flex-col justify-center items-center px-4 py-16 md:py-36">
+                <div class="mb-6 md:mb-8 px-2 text-center max-w-6xl">
+                  <h1 class="mb-6 mx-auto text-3xl bg-gradient-to-b from-white to-[#c2c2c2] bg-clip-text text-transparent font-semibold md:mb-8 md:text-6xl">
+                    <span class="inline-block mb-2 md:mb-8">
+                      <span data-translatable>Premium Cheats</span>
+                    </span>
+                    <span class="block">
+                      <span class="rounded-xl pill-dark-blue font-bold px-3 md:px-4">
+                        <span class="typing-words" data-words="Netflix,Nitro,Server Boosts,Fivem,NBA,Youtube Subs,Spotify Followers,DC fake member,Tools,Tiktok Likes,Robux">Play With an Advantage.</span>
+                      </span>
+                    </span>
+                  </h1>
+
+                  <h2 class="mx-auto text-sm text-gray-200 font-light max-w-2xl md:text-lg">
+                    <span data-translatable>Exclusive tools built to give you the edge over your competition.</span>
+                  </h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 relative">
+                  <a href="#products" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-3xl text-sm font-semibold bg-gradient-to-b from-[#0040FF] to-[#0018A8] text-white border border-white/8 transition-all duration-300 ease-in-out hover:opacity-90 [&>svg]:size-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258-.011.002-.071.035-.02.004-.014-.004-.071-.035q-.016-.005-.024.005l-.004.01-.017.428.005.02.01.013.104.074.015.004.012-.004.104-.074.012-.016.004-.017-.017-.427q-.004-.016-.017-.018m.265-.113-.013.002-.185.093-.01.01-.003.011.018.43.005.012.008.007.201.093q.019.005.029-.008l.004-.014-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014-.034.614q .001.018.017.024l.015-.002.201-.093.01-.008.004-.011.017-.43-.003-.012-.01-.01z"/><path fill="currentColor" d="M4 3.5a1.5 1.5 0 0 1 1.493 1.356L5.5 5v12.5H20a1.5 1.5 0 0 1 .144 2.993L20 20.5H4a1.5 1.5 0 0 1-1.493-1.356L2.5 19V5A1.5 1.5 0 0 1 4 3.5m16.193 2.818c1.346 0 2.02 1.627 1.068 2.578l-5.569 5.569a1.6 1.6 0 0 1-2.263 0l-2.404-2.404l-2.475 2.475a1.5 1.5 0 1 1-2.121-2.122L9.894 8.95a1.6 1.6 0 0 1 2.262 0l2.405 2.405l2.181-2.182a1.5 1.5 0 0 1 .647-2.854z"/></g></svg>
+                    <span data-translatable>Our Products // Nuestros Productos</span>
+                  </a>
+
+                  <a href="https://discord.gg/2dDR3fg4Ry" target="_blank" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-3xl text-sm font-semibold btn-dark-blue transition-all duration-300 ease-in-out hover:opacity-90 [&>svg]:size-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.1.1 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.1 16.1 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01 .04.03 .05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07 .01c.11 .09.22 .17.33 .26c.04 .03.04 .09-.01 .11c-.52 .31-1.07 .56-1.64 .78c-.04 .01-.05 .06-.04 .09c.32 .61.68 1.19 1.07 1.74c.03 .01.06 .02.09 .01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02M8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12m6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12"/></svg>
+                    <span data-translatable>Our Discord // Nuestro Discord</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- STATS -->
+          <section id="stats" class="component" data-component-id="stats">
+            <div class="max-w-7xl mx-auto px-4 mb-16 md:mb-24">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
+                <div class="card-gradient relative overflow-hidden">
+                  <div class="card-sheen"></div>
+                  <div class="relative size-full p-6">
+                    <div class="flex items-center gap-2 mb-3 [&>svg]:size-5 [&>svg]:text-accent-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258-.011.002-.071.035-.02.004-.014-.004-.071-.035q-.016-.005-.024.005l-.004.01-.017.428.005.02.01.013.104.074.015.004.012-.004.104-.074.012-.016.004-.017-.017-.427q-.004-.016-.017-.018m.265-.113-.013.002-.185.093-.01.01-.003.011.018.43.005.012.008.007.201 .093q.019.005.029-.008l .004-.014-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014-.034.614q.001 .018.017 .024l.015-.002.201-.093.01-.008.004-.011.017-.43-.003-.012-.01-.01z"/><path fill="currentColor" d="M4 3.5a1.5 1.5 0 0 1 1.493 1.356L5.5 5v12.5H20a1.5 1.5 0 0 1 .144 2.993L20 20.5H4a1.5 1.5 0 0 1-1.493-1.356L2.5 19V5A1.5 1.5 0 0 1 4 3.5m16.193 2.818c1.346 0 2.02 1.627 1.068 2.578l-5.569 5.569a1.6 1.6 0 0 1-2.263 0l-2.404-2.404l-2.475 2.475a1.5 1.5 0 1 1-2.121-2.122L9.894 8.95a1.6 1.6 0 0 1 2.262 0l2.405 2.405l2.181-2.182a1.5 1.5 0 0 1 .647-2.854z"/></g></svg>
+                      <h4 class="text-base font-medium text-white"><span data-translatable>200+ Sales // 326973 Ventas</span></h4>
+                    </div>
+                    <p class="text-xs/5 font-normal text-gray-200"><span data-translatable>We are proud to have sold 200+ products to our customers. // Estamos orgullosos de haber vendido 326973 productos a nuestros clientes.</span></p>
+                  </div>
+                </div>
+
+                <div class="card-gradient relative overflow-hidden">
+                  <div class="card-sheen"></div>
+                  <div class="relative size-full p-6">
+                    <div class="flex items-center gap-2 mb-3 [&>svg]:size-5 [&>svg]:text-accent-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path d="m12.594 23.258-.012.002-.071.035-.02 .004-.014-.004-.071-.036q-.016-.004-.024.006l-.004 .01-.017.428.005.02.01.013.104.074.015.004.012-.004.104-.074.012-.016.004-.017-.017-.427q-.004-.016-.016-.018m.264-.113-.014.002-.184.093-.01.01-.003.011.018.43.005.012.008.008.201.092q.019.005.029-.008l.004-.014-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014-.034.614q.001.018.017.024l.015-.002.201-.093.01-.008.003-.011.018-.43-.003-.012-.01-.01z"/><path fill="currentColor" d="M12 12c1.873 0 3.57.62 4.815 1.487c1.183.825 2.185 2.051 2.185 3.37c0 .724-.309 1.324-.796 1.77c-.458 .421-1.056 .694-1.672 .88C15.301 19.88 13.68 20 12 20s-3.301-.12-4.532-.493c-.616-.186-1.214-.459-1.673-.88C5.31 18.182 5 17.582 5 16.858c0-1.319 1.002-2.545 2.185-3.37C8.43 12.62 10.127 12 12 12m7 1c1.044 0 1.992 .345 2.693.833c .64 .447 1.307 1.19 1.307 2.096c0 .517-.225.946-.56 1.253c-.306.281-.684.446-1.029.55c-.47 .142-1.025 .215-1.601 .247c.122-.345.19-.72.19-1.122c0-1.535-.959-2.839-2.032-3.744A4.8 4.8 0 0 1 19 13M5 13q.537.002 1.032.113C4.96 14.018 4 15.322 4 16.857c0 .402.068 .777.19 1.122c-.576-.032-1.13-.105-1.601-.247c-.345-.104-.723-.269-1.03-.55A1.68 1.68 0 0 1 1 15.93c0-.905.666-1.649 1.307-2.096A4.76 4.76 0 0 1 5 13m13.5-6a2.5 2.5 0 1 1 0 5a2.5 2.5 0 0 1 0-5m-13 0a2.5 2.5 0 1 1 0 5a2.5 2.5 0 0 1 0-5M12 3a4 4 0 1 1 0 8a4 4 0 0 1 0-8"/></g></svg>
+                      <h4 class="text-base font-medium text-white"><span data-translatable>100+ Customers // 26959 Clientes</span></h4>
+                    </div>
+                    <p class="text-xs/5 font-normal text-gray-200"><span data-translatable>We have served {{ shop.total_customers }} customers who have trusted our products. // Hemos servido a 26959 clientes que han confiado en nuestros productos.</span></p>
+                  </div>
+                </div>
+
+                <div class="card-gradient relative overflow-hidden">
+                  <div class="card-sheen"></div>
+                  <div class="relative size-full p-6">
+                    <div class="flex items-center gap-2 mb-3 [&>svg]:size-5 [&>svg]:text-accent-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258-.011.002-.071.035-.02.004-.014-.004-.071-.035q-.016-.005-.024.005l-.004.01-.017.428.005.02.01.013.104.074.015.004.012-.004.104-.074.012-.016.004-.017-.017-.427q-.004-.016-.017-.018m.265-.113-.013.002-.185.093-.01.01-.003.011.018.43.005.012.008.007.201 .093q.019.005.029-.008l .004-.014-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014-.034.614q.001.018.017.024l.015-.002.201-.093.01-.008.004-.011.017-.43-.003-.012-.01-.01z"/><path fill="currentColor" d="M10.92 2.868a1.25 1.25 0 0 1 2.16 0l2.795 4.798l5.428 1.176a1.25 1.25 0 0 1 .667 2.054l-3.7 4.141l.56 5.525a1.25 1.25 0 0 1-1.748 1.27L12 19.592l-5.082 2.24a1.25 1.25 0 0 1-1.748-1.27l.56-5.525l-3.7-4.14a1.25 1.25 0 0 1 .667-2.055l5.428-1.176z"/></g></svg>
+                      <h4 class="text-base font-medium text-white"><span data-translatable>Good Reviews // 1683 Opiniones</span></h4>
+                    </div>
+                    <p class="text-xs/5 font-normal text-gray-200"><span data-translatable>Our customers have left Good amazing reviews about our products. // Nuestros clientes han dejado 1683 increíbles opiniones sobre nuestros productos.</span></p>
+                  </div>
+                </div>
+
+                <div class="card-gradient relative overflow-hidden">
+                  <div class="card-sheen"></div>
+                  <div class="relative size-full p-6">
+                    <div class="flex items-center gap-2 mb-3 [&>svg]:size-5 [&>svg]:text-accent-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258-.011.002-.071.035-.02.004-.014-.004-.071-.035q-.016-.005-.024.005l-.004.01-.017.428.005.02.01.013.104.074.015.004.012-.004.104-.074.012-.016.004-.017-.017-.427q-.004-.016-.017-.018m.265-.113-.013.002-.185.093-.01.01-.003.011.018.43.005.012.008.007.201.093q.019.005.029-.008l.004-.014-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014-.034.614q.001.018.017.024l.015-.002.201-.093.01-.008.004-.011.017-.43-.003-.012-.01-.01z"/><path fill="currentColor" d="M10.92 2.868a1.25 1.25 0 0 1 2.16 0l2.795 4.798l5.428 1.176a1.25 1.25 0 0 1 .667 2.054l-3.7 4.141l.56 5.525a1.25 1.25 0 0 1-1.748 1.27L12 19.592l-5.082 2.24a1.25 1.25 0 0 1-1.748-1.27l.56-5.525l-3.7-4.14a1.25 1.25 0 0 1 .667-2.055l5.428-1.176z"/></g></svg>
+                      <h4 class="text-base font-medium text-white"><span data-translatable>{{ shop.average_rating }} Average Rating // 5 Valoración Media</span></h4>
+                    </div>
+                    <p class="text-xs/5 font-normal text-gray-200"><span data-translatable>Our customers have rated us with an average rating of {{ shop.average_rating }}. // Nuestros clientes han valorado nuestros productos con una valoración media de 5.</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PRICE COMPARISON -->
+          <section id="price-comparison" class="component" data-component-id="price-comparison">
+            <div class="max-w-7xl mx-auto px-4 mb-16 md:mb-24">
+              <div class="mb-8 md:mb-12">
+                <div class="flex items-center justify-center mx-auto">
+                  </div>
+                </div>
+
+                
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- PRODUCTS -->
+          <section
+            id="products"
+            class="component"
+            data-component-id="products"
+            x-data="{ openGroupModalId: null, openGroupModal(id) { this.openGroupModalId = id; document.body.style.overflow = 'hidden'; }, closeGroupModal() { this.openGroupModalId = null; document.body.style.overflow = 'auto'; } }"
+          >
+            <div class="px-4 mb-16 md:mb-24">
+              <div class="mb-8 md:mb-12">
+                <div class="flex items-center justify-center mx-auto">
+                  <div class="flex items-center gap-2 px-3 py-2 badge-dark-blue text-white text-xs rounded-lg tracking-[-0.008em]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258-.011.002-.071 .035-.02.004-.014-.004-.071-.035q-.016-.005-.024.005l-.004.01-.017.428.005.02.01 .013.104.074.015.004.012-.004.104-.074.012-.016.004-.017-.017-.427q-.004-.016-.017-.018m.265-.113-.013.002-.185.093-.01.01-.003.011.018.43.005.012.008.007.201.093q.019.005.029-.008l.004-.014-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014-.034.614q.001.018.017.024l.015-.002.201-.093.01-.008 .004-.011.017-.43-.003-.012-.01-.01z"/><path fill="currentColor" d="M18.06 3a2 2 0 0 1 1.98 1.719l.017.156l.875 14a2 2 0 0 1-1.847 2.12l-.15.005H5.066a2 2 0 0 1-2-1.976l.003-.149l .875-14a2 2 0 0 1 1.84-1.869L5.94 3zM15 7a1 1 0 0 0-.993.883L14 8a2 2 0 1 1-4 0a1 1 0 0 0-2 0a4 4 0 0 0 8 0a1 1 0 0 0 1-1"/></g></svg>
+                    <span data-translatable>Products // Productos</span>
+                  </div>
+                </div>
+
+                <h2 class="mt-1 text-[30px] md:mt-0 md:text-[40px] text-center bg-gradient-to-b from-white to-[#c2c2c2] bg-clip-text text-transparent font-semibold tracking-[-0.008em]">
+                  <span data-translatable>Our Products // Nuestros Productos</span>
+                </h2>
+
+                <p class="text-center text-sm md:-mt-1.5 md:text-base text-[#a3a3a3] font-light tracking-[-0.008em]">
+                  <span data-translatable>Find the perfect product for your needs. // Encuentra el producto perfecto para tus necesidades.</span>
+                </p>
+              </div>
+
+              <!-- Your actual products grid/list continues here -->
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

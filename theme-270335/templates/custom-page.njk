@@ -1,0 +1,13 @@
+<div class="container">
+  <section class="py-5-nav">
+    <div class="section-title">
+      <h1>{{ name }}</h1>
+    </div>
+  </section>
+</div>
+
+<div class="components">
+  {% for componentId in components_order %}
+    {% render_component componentId %}
+  {% endfor %}
+</div>

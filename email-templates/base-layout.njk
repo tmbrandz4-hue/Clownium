@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+
+      body, table, td, a {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+
+      table, td {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+
+      img {
+        -ms-interpolation-mode: bicubic;
+        border: 0;
+        height: auto;
+        line-height: 100%;
+        outline: none;
+        text-decoration: none;
+      }
+
+      .content-wrapper {
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+      }
+
+      body {
+        background-color: #070a10;
+        color: #9ab0cf;
+        font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+        font-size: 15px;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        width: 100% !important;
+      }
+
+      .email-wrapper {
+        background-color: #070a10;
+        padding: 32px 0;
+        width: 100%;
+      }
+
+      .email-content {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+      }
+
+      .email-header {
+        padding: 0 0 20px 0;
+        text-align: center;
+      }
+
+      .brand-link {
+        color: #ffffff !important;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .brand-image {
+        border: 0;
+        display: block;
+        height: auto;
+        margin: 0 auto;
+        max-height: 44px;
+        max-width: 160px;
+        vertical-align: middle;
+      }
+
+      .content-wrapper {
+        background-color: #0b1526;
+        border: 1px solid rgba(120, 180, 255, 0.16);
+        border-radius: 14px;
+        margin: 0 auto;
+        padding: 0;
+        width: 100%;
+        max-width: 570px;
+      }
+
+      .content-body {
+        padding: 36px 40px;
+      }
+
+      h1 {
+        color: #e6efff;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.3;
+        margin: 0 0 14px 0;
+        text-align: left;
+        letter-spacing: -0.02em;
+      }
+
+      p {
+        color: #9ab0cf;
+        font-size: 15px;
+        line-height: 1.65;
+        margin: 0 0 14px 0;
+        text-align: left;
+      }
+
+      a {
+        color: #6ea8ff;
+        text-decoration: underline;
+      }
+
+      .no-margin {
+        margin-bottom: 0 !important;
+      }
+
+      .button-container {
+        padding: 6px 0 18px 0;
+      }
+
+      .button {
+        background-color: #2563eb;
+        border-radius: 10px;
+        box-sizing: border-box;
+        color: #ffffff !important;
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        padding: 13px 22px;
+        text-align: center;
+        text-decoration: none;
+        width: 100%;
+        -webkit-text-size-adjust: none;
+      }
+
+      .button-secondary {
+        background-color: transparent;
+        border: 1px solid rgba(120, 180, 255, 0.22);
+        border-radius: 10px;
+        box-sizing: border-box;
+        color: #c9dcf5 !important;
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 12px 22px;
+        text-align: center;
+        text-decoration: none;
+        width: 100%;
+        -webkit-text-size-adjust: none;
+      }
+
+      .info-table {
+        border-collapse: collapse;
+        margin: 0 0 20px 0;
+        width: 100%;
+      }
+
+      .info-row td {
+        border-bottom: 1px solid rgba(120, 180, 255, 0.1);
+        color: #9ab0cf;
+        font-size: 14px;
+        padding: 10px 0;
+        vertical-align: middle;
+      }
+
+      .info-row:last-child td {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .info-label {
+        color: #5f7186;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        width: 1%;
+        padding-right: 24px !important;
+      }
+
+      .info-value {
+        color: #e6efff;
+        font-weight: 500;
+        text-align: right !important;
+      }
+
+      .badge {
+        border-radius: 6px;
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        padding: 3px 8px;
+      }
+
+      .badge-success {
+        background-color: rgba(34, 197, 94, 0.12);
+        color: #4ade80;
+      }
+
+      .badge-warning {
+        background-color: rgba(234, 179, 8, 0.12);
+        color: #facc15;
+      }
+
+      .badge-error {
+        background-color: rgba(239, 68, 68, 0.12);
+        color: #f87171;
+      }
+
+      .badge-info {
+        background-color: rgba(110, 168, 255, 0.14);
+        color: #6ea8ff;
+      }
+
+      .badge-neutral {
+        background-color: rgba(120, 180, 255, 0.08);
+        color: #9ab0cf;
+      }
+
+      .message-block {
+        background-color: rgba(120, 180, 255, 0.05);
+        border-left: 3px solid rgba(120, 180, 255, 0.25);
+        border-radius: 0 6px 6px 0;
+        color: #9ab0cf;
+        font-size: 14px;
+        line-height: 1.65;
+        margin: 0 0 20px 0;
+        padding: 12px 16px;
+      }
+
+      .code-block {
+        background-color: #041224;
+        border: 1px solid #1d4ed8;
+        border-radius: 10px;
+        color: #6ea8ff;
+        font-family: 'Geist Mono', 'SF Mono', 'Fira Code', ui-monospace, 'Courier New', monospace;
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        margin: 0 0 20px 0;
+        padding: 20px 24px;
+        text-align: center;
+      }
+
+      .coupon-block {
+        background-color: rgba(37, 99, 235, 0.1);
+        border: 1.5px dashed rgba(110, 168, 255, 0.35);
+        border-radius: 10px;
+        margin: 0 0 20px 0;
+        padding: 18px 20px;
+        text-align: center;
+      }
+
+      .coupon-code {
+        color: #e6efff;
+        font-family: 'Geist Mono', 'SF Mono', 'Fira Code', ui-monospace, 'Courier New', monospace;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        display: block;
+        margin: 0 0 6px 0;
+      }
+
+      .coupon-meta {
+        color: #9ab0cf;
+        font-size: 13px;
+        margin: 0;
+      }
+
+      .coupon-expiry {
+        background-color: rgba(234, 179, 8, 0.12);
+        border-radius: 4px;
+        color: #facc15;
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 500;
+        margin-top: 8px;
+        padding: 2px 8px;
+      }
+
+      .item-table {
+        border-collapse: collapse;
+        margin: 0 0 20px 0;
+        width: 100%;
+      }
+
+      .item-row td {
+        border-bottom: 1px solid rgba(120, 180, 255, 0.1);
+        color: #c9dcf5;
+        font-size: 14px;
+        padding: 10px 0;
+        vertical-align: top;
+      }
+
+      .item-row:last-child td {
+        border-bottom: none;
+      }
+
+      .item-name {
+        font-weight: 500;
+      }
+
+      .item-qty {
+        color: #5f7186;
+        font-size: 13px;
+        white-space: nowrap;
+        text-align: right !important;
+        padding-left: 16px !important;
+      }
+
+      .item-price {
+        color: #e6efff;
+        font-weight: 500;
+        text-align: right !important;
+        white-space: nowrap;
+        padding-left: 12px !important;
+      }
+
+      .total-row td {
+        border-top: 2px solid rgba(120, 180, 255, 0.16);
+        color: #e6efff;
+        font-size: 15px;
+        font-weight: 700;
+        padding: 12px 0 0 0;
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px solid rgba(120, 180, 255, 0.1);
+        margin: 20px 0;
+        height: 0;
+      }
+
+      .tracking-block {
+        background-color: rgba(120, 180, 255, 0.05);
+        border: 1px solid rgba(120, 180, 255, 0.1);
+        border-radius: 8px;
+        margin: 0 0 20px 0;
+        padding: 14px 16px;
+      }
+
+      .tracking-label {
+        color: #5f7186;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        margin: 0 0 4px 0;
+        text-transform: uppercase;
+      }
+
+      .tracking-code {
+        color: #c9dcf5;
+        font-family: 'Geist Mono', 'SF Mono', 'Fira Code', ui-monospace, 'Courier New', monospace;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        margin: 0;
+      }
+
+      .footer-wrapper {
+        margin: 0 auto;
+        width: 100%;
+        max-width: 570px;
+      }
+
+      .footer-content {
+        padding: 20px 40px 32px;
+        text-align: center;
+      }
+
+      .copyright {
+        color: #5f7186;
+        font-size: 12px;
+        line-height: 1.5;
+        margin: 0 0 6px 0;
+        text-align: center;
+      }
+
+      .footer-links {
+        color: #5f7186;
+        font-size: 11px;
+        line-height: 1.5;
+        margin: 0;
+        text-align: center;
+      }
+
+      .footer-link {
+        color: #5f7186;
+        text-decoration: none;
+      }
+
+      .footer-link:hover {
+        color: #6ea8ff;
+        text-decoration: underline;
+      }
+
+      .link-separator {
+        color: rgba(120, 180, 255, 0.25);
+        margin: 0 6px;
+      }
+
+      @media only screen and (max-width: 600px) {
+        .email-wrapper { padding: 16px 0 !important; }
+        .content-wrapper, .footer-wrapper { max-width: 100% !important; border-radius: 0 !important; border-left: none !important; border-right: none !important; }
+        .content-body, .footer-content { padding: 24px 20px !important; }
+        h1 { font-size: 20px !important; }
+        .code-block { font-size: 26px !important; letter-spacing: 0.12em !important; }
+        .button, .button-secondary { display: block !important; text-align: center !important; }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body { background-color: #04060a !important; color: #9ab0cf !important; }
+        .email-wrapper { background-color: #04060a !important; }
+        .content-wrapper {
+          background-color: #08101e !important;
+          border-color: rgba(120, 180, 255, 0.12) !important;
+        }
+        h1 { color: #f0f6ff !important; }
+        p { color: #9ab0cf !important; }
+        a { color: #6ea8ff !important; }
+        .brand-link { color: #ffffff !important; }
+        .button { background-color: #2563eb !important; color: #ffffff !important; }
+        .button-secondary {
+          border-color: rgba(120, 180, 255, 0.2) !important;
+          color: #c9dcf5 !important;
+        }
+        .info-table { border-color: rgba(120, 180, 255, 0.1) !important; }
+        .info-row td { border-color: rgba(120, 180, 255, 0.08) !important; }
+        .info-label { color: #4a5a6e !important; }
+        .info-value { color: #f0f6ff !important; }
+        .message-block {
+          background-color: rgba(120, 180, 255, 0.04) !important;
+          border-left-color: rgba(120, 180, 255, 0.2) !important;
+          color: #9ab0cf !important;
+        }
+        .code-block {
+          background-color: #041224 !important;
+          border-color: #1d4ed8 !important;
+          color: #6ea8ff !important;
+        }
+        .coupon-block {
+          background-color: rgba(37, 99, 235, 0.08) !important;
+          border-color: rgba(110, 168, 255, 0.28) !important;
+        }
+        .coupon-code { color: #f0f6ff !important; }
+        .item-row td { border-color: rgba(120, 180, 255, 0.08) !important; color: #c9dcf5 !important; }
+        .item-name { color: #f0f6ff !important; }
+        .total-row td { border-color: rgba(120, 180, 255, 0.14) !important; color: #f0f6ff !important; }
+        .tracking-block {
+          background-color: rgba(120, 180, 255, 0.04) !important;
+          border-color: rgba(120, 180, 255, 0.08) !important;
+        }
+        .tracking-code { color: #c9dcf5 !important; }
+        .divider { border-color: rgba(120, 180, 255, 0.1) !important; }
+        .badge-neutral { background-color: rgba(120, 180, 255, 0.08) !important; color: #9ab0cf !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-wrapper">
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" class="email-content">
+        <tr>
+          <td align="center" class="email-header">
+            <a href="{{ shop.url }}" class="brand-link" target="_blank" rel="noopener">
+              {% if shop.image_url %}
+                <img src="{{ shop.image_url }}" alt="{{ shop.name }}" class="brand-image">
+              {% else %}
+                {{ shop.name }}
+              {% endif %}
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td align="center">
+            <table align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation" class="content-wrapper" style="max-width: 570px;">
+              <tr>
+                <td class="content-body">
+                  {{ templateContent | safe }}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center">
+            <table align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation" class="footer-wrapper" style="max-width: 570px;">
+              <tr>
+                <td class="footer-content">
+                  {% set hasSocial = shop.discord_url or shop.youtube_url or shop.telegram_url or shop.tiktok_url or shop.instagram_url %}
+                  {% if hasSocial %}
+                  <p class="footer-links" style="margin: 0 0 10px 0;">
+                    {% set sep = joiner(' · ') %}
+                    {% if shop.discord_url %}{{ sep() }}<a href="{{ shop.discord_url }}" class="footer-link" target="_blank" rel="noopener">Discord</a>{% endif %}
+                    {% if shop.youtube_url %}{{ sep() }}<a href="{{ shop.youtube_url }}" class="footer-link" target="_blank" rel="noopener">YouTube</a>{% endif %}
+                    {% if shop.telegram_url %}{{ sep() }}<a href="{{ shop.telegram_url }}" class="footer-link" target="_blank" rel="noopener">Telegram</a>{% endif %}
+                    {% if shop.tiktok_url %}{{ sep() }}<a href="{{ shop.tiktok_url }}" class="footer-link" target="_blank" rel="noopener">TikTok</a>{% endif %}
+                    {% if shop.instagram_url %}{{ sep() }}<a href="{{ shop.instagram_url }}" class="footer-link" target="_blank" rel="noopener">Instagram</a>{% endif %}
+                  </p>
+                  {% endif %}
+                  <p class="copyright">
+                    &copy; {{ helpers.date.getYear() }} {{ shop.name }}. All rights reserved.
+                  </p>
+                  <p class="footer-links">
+                    {% if unsubscribe_url %}
+                      <a href="{{ unsubscribe_url }}" class="footer-link" target="_blank" rel="noopener">Unsubscribe</a>
+                    {% endif %}
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>
