@@ -89,9 +89,6 @@
 
       {% if templateName != 'maintenance' %}
         {% render_component "footer" %}
-        {% if templateName != 'account' %}
-          {% render_snippet "customer-login-modal.njk" %}
-        {% endif %}
       {% endif %}
     </div>
 

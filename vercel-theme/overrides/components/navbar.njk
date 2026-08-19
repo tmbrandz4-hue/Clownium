@@ -74,7 +74,8 @@
         {% endif %}
 
         {% if not global.components.navbar.hide_customer_dashboard %}
-        <li class="nav-item user d-none d-lg-block">
+        <li class="nav-item user d-none d-lg-block d-flex gap-2">
+          <a href="/customer/dashboard" class="nav-ghost">Login</a>
           <a href="https://clownium.mysellauth.com/customer/dashboard" class="nav-ghost">My Account</a>
         </li>
         {% endif %}
