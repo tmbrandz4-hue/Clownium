@@ -12,22 +12,22 @@
         <div class="text-center mb-5">
           <h1 class="fw-bold mb-2">My Account</h1>
           <p style="color:#9ab0cf" class="mb-0">
-            View your orders, invoices and support tickets.
+            Link your Discord account to continue to your dashboard.
           </p>
         </div>
 
         <div class="cl-dash-card mb-4">
           <div class="p-4 p-md-5 text-center">
-            <h2 class="h5 fw-semibold mb-2">Sign in to your account</h2>
+            <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;border-radius:16px;background:rgba(59,130,246,.14);color:#60a5fa">
+              <i class="fa-brands fa-discord" style="font-size:1.8rem"></i>
+            </div>
+            <h2 class="h5 fw-semibold mb-2">Discord login required</h2>
             <p style="color:#9ab0cf" class="mb-4">
-              Signing in is handled securely with a one-time email code — no password to remember.
+              To access orders, tickets, and account features, you must link your Discord account first.
             </p>
-            <button
-              class="btn cl-dash-btn w-100"
-              @click="openLoginModal()"
-            >
-              Sign in with email
-            </button>
+            <a class="btn cl-dash-btn w-100" :href="discordLinkUrl()">
+              <i class="fa-brands fa-discord me-2"></i>Continue with Discord
+            </a>
           </div>
         </div>
 
@@ -46,12 +46,12 @@
           <div class="col-12 col-md-6">
             <div class="cl-dash-card h-100">
               <div class="p-4">
-                <h3 class="h6 fw-semibold">Need help?</h3>
+                <h3 class="h6 fw-semibold">Already linked?</h3>
                 <p style="color:#9ab0cf;font-size:.875rem" class="mb-3">
-                  Sign in to open a support ticket on any of your orders.
+                  If you already linked Discord and still cannot access your account, refresh and try again.
                 </p>
-                <button class="btn cl-dash-btn-outline" @click="openLoginModal()">
-                  Open a ticket
+                <button class="btn cl-dash-btn-outline" @click="refreshDiscord()">
+                  Refresh Discord Status
                 </button>
               </div>
             </div>
@@ -478,15 +478,6 @@ document.addEventListener('alpine:init', () => {
       if (this.token) {
         this.loggedIn = true;
         this.loadForTab();
-      } else {
-        // Not logged in — redirect to login modal via ?login=1&back=dashboard
-        const back = p.includes('/customer/invoices') ? 'invoices'
-                   : p.includes('/customer/tickets') ? 'tickets'
-                   : 'dashboard';
-        const already = new URLSearchParams(window.location.search);
-        if (!already.get('login')) {
-          window.location.replace('/customer/dashboard?login=1&back=' + back);
-        }
       }
       window.addEventListener('cl:login', () => {
         try {
