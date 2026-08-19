@@ -74,9 +74,8 @@
         {% endif %}
 
         {% if not global.components.navbar.hide_customer_dashboard %}
-        <li class="nav-item user d-none d-lg-block" x-data="clNavAccount()" x-init="init()">
-          <a href="/customer/dashboard" class="nav-ghost" x-show="loggedIn" x-cloak>My Account</a>
-          <button type="button" data-bs-toggle="modal" data-bs-target="#customer-login-modal" class="nav-ghost" x-show="!loggedIn" x-cloak>Login</button>
+        <li class="nav-item user d-none d-lg-block">
+          <a href="https://clownium.mysellauth.com/customer/dashboard" class="nav-ghost">My Account</a>
         </li>
         {% endif %}
 

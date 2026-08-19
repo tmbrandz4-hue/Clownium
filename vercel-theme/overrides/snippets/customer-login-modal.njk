@@ -6,6 +6,23 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        <div x-show="appCustomer.modalStep === 0">
+          <div class="text-center">
+            <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;border-radius:16px;background:rgba(59,130,246,.14);color:#60a5fa">
+              <i class="fa-brands fa-discord" style="font-size:1.8rem"></i>
+            </div>
+            <h6 class="fw-semibold mb-2">Connect Discord first</h6>
+            <p class="form-text mb-3">Before logging in, connect your Discord account so we can link your dashboard access.</p>
+            <a class="btn cl-modal-btn w-100" href="https://www.clownium.com/api/discord-login?next=/customer/dashboard?login=1&discord=linked">
+              <i class="fa-brands fa-discord me-2"></i>Connect Discord
+            </a>
+            <button type="button" class="btn cl-dash-btn-outline mt-3 w-100" @click="appCustomer.modalStep = 1">
+              I already connected Discord
+            </button>
+            <p class="form-text mt-3 mb-0 text-center">No account? Create one by connecting Discord and verifying your email.</p>
+          </div>
+        </div>
+
         <div x-show="appCustomer.modalStep === 1">
           <form @submit.prevent="appCustomer.modalRequestOtp()">
             <div class="mb-1">
@@ -184,6 +201,10 @@
     if (!ev.target || ev.target.id !== 'customer-login-modal') return;
     busy = false;
     window.dispatchEvent(new CustomEvent('cl-reset', { detail: null }));
+    try {
+      var app = window.alpineApp && window.alpineApp.appCustomer;
+      if (app) app.modalStep = 0;
+    } catch {}
   });
 
   // Also reset when modal is dismissed (X, backdrop, Escape)
@@ -191,6 +212,10 @@
     if (!ev.target || ev.target.id !== 'customer-login-modal') return;
     busy = false;
     window.dispatchEvent(new CustomEvent('cl-reset', { detail: null }));
+    try {
+      var app = window.alpineApp && window.alpineApp.appCustomer;
+      if (app) app.modalStep = 0;
+    } catch {}
   });
 
   // Reset captcha after a failed OTP request (rate limit / too many codes)

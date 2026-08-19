@@ -1,223 +1,28 @@
-<section
-  class="container component py-5-nav"
-  x-data="clDashboard()"
-  x-init="init()"
->
-
-  {# ─── LOGGED-OUT STATE ─────────────────────────────────────────────────── #}
-  <template x-if="!loggedIn">
-    <div class="row justify-content-center">
-      <div class="col-12 col-lg-7">
-
-        <div class="text-center mb-5">
-          <h1 class="fw-bold mb-2">My Account</h1>
-          <p style="color:#9ab0cf" class="mb-0">
-            Link your Discord account to continue to your dashboard.
-          </p>
-        </div>
-
-        <div class="cl-dash-card mb-4">
-          <div class="p-4 p-md-5 text-center">
-            <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;border-radius:16px;background:rgba(59,130,246,.14);color:#60a5fa">
-              <i class="fa-brands fa-discord" style="font-size:1.8rem"></i>
-            </div>
-            <h2 class="h5 fw-semibold mb-2">Discord login required</h2>
-            <p style="color:#9ab0cf" class="mb-4">
-              To access orders, tickets, and account features, you must link your Discord account first.
-            </p>
-            <a class="btn cl-dash-btn w-100" :href="discordLinkUrl()">
-              <i class="fa-brands fa-discord me-2"></i>Continue with Discord
-            </a>
-          </div>
-        </div>
-
-        <div class="row g-4">
-          <div class="col-12 col-md-6">
-            <div class="cl-dash-card h-100">
-              <div class="p-4">
-                <h3 class="h6 fw-semibold">Check an order status</h3>
-                <p style="color:#9ab0cf;font-size:.875rem" class="mb-3">
-                  Look up an order with your invoice number and email — no login needed.
-                </p>
-                <a class="btn cl-dash-btn-outline" href="/status">Order status</a>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="cl-dash-card h-100">
-              <div class="p-4">
-                <h3 class="h6 fw-semibold">Already linked?</h3>
-                <p style="color:#9ab0cf;font-size:.875rem" class="mb-3">
-                  If you already linked Discord and still cannot access your account, refresh and try again.
-                </p>
-                <button class="btn cl-dash-btn-outline" @click="refreshDiscord()">
-                  Refresh Discord Status
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
+<section class="container component py-5-nav" style="min-height:60vh;display:flex;align-items:center;justify-content:center;text-align:center">
+  <div class="cl-dash-card p-4 p-md-5" style="max-width:680px;width:100%">
+    <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;border-radius:16px;background:rgba(59,130,246,.14);color:#60a5fa">
+      <i class="fa fa-user" style="font-size:1.6rem"></i>
     </div>
-  </template>
+    <h1 class="fw-bold mb-2">Redirecting to My Account</h1>
+    <p style="color:#9ab0cf" class="mb-4">
+      We’re sending you to the hosted customer dashboard.
+    </p>
+    <a class="btn cl-dash-btn" href="https://clownium.mysellauth.com/customer/dashboard">Open My Account</a>
+  </div>
+</section>
 
-  {# ─── LOGGED-IN DASHBOARD ──────────────────────────────────────────────── #}
-  <template x-if="loggedIn">
-    <div>
-      {# Page heading #}
-      <div class="mb-4">
-        <h1 class="fw-bold mb-0">My Account</h1>
-        <small style="color:#9ab0cf" x-text="displayEmail()"></small>
-      </div>
+<script>
+(function () {
+  var target = 'https://clownium.mysellauth.com/customer/dashboard';
+  try {
+    window.location.replace(target);
+  } catch (_) {
+    window.location.href = target;
+  }
+})();
+</script>
 
-      <div class="row">
-
-        {# Sidebar #}
-        <div class="col-12 col-lg-3 mb-4">
-          <div class="cl-dash-card p-4">
-            <div class="mb-4 pb-3" style="border-bottom:1px solid rgba(120,180,255,.08)">
-              <h4 class="fw-bold mb-1">My Account</h4>
-              <div style="color:#9ab0cf;font-size:.95rem;word-break:break-word" x-text="displayEmail()"></div>
-            </div>
-
-            <div class="mb-4 pb-3" style="border-bottom:1px solid rgba(120,180,255,.08)">
-              <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                <h6 class="fw-semibold mb-0">Discord</h6>
-                <span class="badge" :class="discordLinked ? 'bg-success' : 'bg-secondary'" x-text="discordLinked ? 'Linked' : 'Not linked'"></span>
-              </div>
-              <template x-if="discordLinked && discordUser">
-                <div>
-                  <div style="color:#e6efff;font-size:.95rem;font-weight:600" x-text="discordLabel()"></div>
-                  <div style="color:#9ab0cf;font-size:.82rem;word-break:break-word" x-text="discordUser.email || ''"></div>
-                </div>
-              </template>
-              <div class="d-flex gap-2 mt-3 flex-wrap">
-                <a class="btn btn-sm cl-dash-btn-outline" :href="discordLinkUrl()" x-show="!discordLinked">Link Discord</a>
-                <button class="btn btn-sm cl-dash-btn-outline" type="button" x-show="discordLinked" @click="refreshDiscord()">Refresh</button>
-                <button class="btn btn-sm btn-outline-danger" type="button" x-show="discordLinked" @click="unlinkDiscord()">Unlink</button>
-              </div>
-            </div>
-
-            <ul class="nav flex-column gap-1 nav-pills mb-0">
-              <li class="nav-item">
-                <a href="/customer/dashboard" class="nav-link" :class="{'cl-nav-active':tab==='dashboard'}">
-                  <i class="fa fa-gauge me-2"></i>Dashboard
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="/customer/invoices" class="nav-link" :class="{'cl-nav-active':tab==='orders'}">
-                  <i class="fa fa-box me-2"></i>Orders
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="/customer/tickets" class="nav-link" :class="{'cl-nav-active':tab==='tickets'}">
-                  <i class="fa fa-headset me-2"></i>Tickets
-                </a>
-              </li>
-              <li class="nav-item mt-2">
-                <button class="nav-link w-100 text-start" style="color:#f87171" @click="logout()">
-                  <i class="fa fa-right-from-bracket me-2"></i>Logout
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {# Main content #}
-        <div class="col-12 col-lg-9">
-
-          {# Loading spinner #}
-          <div x-show="loading" class="text-center py-5">
-            <i class="fa fa-circle-notch fa-spin fa-2x" style="color:#3b82f6"></i>
-          </div>
-
-          {# Error banner #}
-          <div x-show="error && !loading" class="alert" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;border-radius:12px" x-text="error"></div>
-
-          {# ── DASHBOARD TAB ── #}
-          <template x-if="tab==='dashboard' && !loading && customer">
-            <div>
-              <div class="row">
-                <div class="col-12 col-md-3 mb-4">
-                  <div class="cl-stat-card p-4 h-100">
-                    <div class="cl-stat-label">Completed Orders</div>
-                    <div class="cl-stat-value" x-text="customer.total_completed ?? 0"></div>
-                  </div>
-                </div>
-                <div class="col-12 col-md-3 mb-4">
-                  <div class="cl-stat-card p-4 h-100">
-                    <div class="cl-stat-label">Total Spent</div>
-                    <div class="cl-stat-value" x-text="fmt(customer.total_spent_usd,'USD')"></div>
-                  </div>
-                </div>
-                <div class="col-12 col-md-3 mb-4" x-show="showBalanceCard()">
-                  <div class="cl-stat-card p-4 h-100">
-                    <div class="cl-stat-label">Balance</div>
-                    <div class="cl-stat-value" x-text="fmt(customerBalance(),'USD')"></div>
-                  </div>
-                </div>
-                <div class="col-12 col-md-3 mb-4">
-                  <div class="cl-stat-card p-4 h-100">
-                    <div class="cl-stat-label">Customer Since</div>
-                    <div class="cl-stat-value" style="font-size:1rem" x-text="fmtDate(customer.created_at || customer.customer_since)"></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="cl-dash-card p-4 mb-4">
-                <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
-                  <div>
-                    <h5 class="fw-semibold mb-1">Latest Order</h5>
-                    <small style="color:#9ab0cf" x-show="showBalanceCard()">
-                      Balance available: <span x-text="fmt(customerBalance(),'USD')"></span>
-                    </small>
-                  </div>
-                  <a x-show="showBalanceCard()" href="/customer/balance" class="btn btn-sm cl-dash-btn-outline">Top Up</a>
-                </div>
-                <template x-if="latestOrder">
-                  <div>
-                    <p class="fw-bold mb-1" x-text="latestOrder.items && latestOrder.items[0] ? latestOrder.items[0].product.name + (latestOrder.items.length > 1 ? ' & ' + (latestOrder.items.length-1) + ' more' : '') : 'Deleted Product'"></p>
-                    <small style="color:#9ab0cf">
-                      Invoice
-                      <a :href="latestOrder.url" target="_blank" style="color:#3b82f6" x-text="'#'+latestOrder.unique_id"></a>
-                      — <span x-text="fmtDate(latestOrder.created_at)"></span>
-                    </small>
-                  </div>
-                </template>
-                <template x-if="!latestOrder">
-                  <p style="color:#9ab0cf" class="mb-0">No orders yet.</p>
-                </template>
-              </div>
-
-              <div class="d-flex justify-content-end">
-                <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cl-delete-modal">
-                  <i class="fa fa-trash me-1"></i>Delete Account
-                </button>
-              </div>
-            </div>
-          </template>
-
-          {# ── ORDERS TAB ── #}
-          <template x-if="tab==='orders' && !loading">
-            <div class="cl-dash-card p-4">
-              <h5 class="fw-semibold mb-3">Orders</h5>
-              <template x-if="orders && orders.data && orders.data.length > 0">
-                <div class="table-responsive">
-                  <table class="table cl-table">
-                    <thead>
-                      <tr>
-                        <th>Status</th>
-                        <th>ID</th>
-                        <th>Product</th>
-                        <th>Price</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <template x-for="inv in orders.data" :key="inv.id">
-                        <tr>
-                          <td>
+{% raw %}{#
                             <span class="badge"
                               :class="{'bg-success':inv.status==='completed','bg-warning text-dark':inv.status==='pending','bg-danger':inv.status==='cancelled'||inv.status==='refunded'}"
                               x-text="inv.status"></span>
@@ -416,9 +221,16 @@
   var dest = back === 'invoices' ? '/customer/invoices'
            : back === 'tickets'  ? '/customer/tickets'
            : '/customer/dashboard';
+  var openAfterDiscord = params.get('discord') === 'linked';
   var t = setInterval(function () {
     if (window.alpineApp && window.alpineApp.appCustomer) {
       window.alpineApp.appCustomer.afterLoginPath = dest;
+      if (openAfterDiscord) {
+        window.alpineApp.appCustomer.modalStep = 1;
+        var modal = document.getElementById('customer-login-modal');
+        if (modal && typeof bootstrap !== 'undefined') bootstrap.Modal.getOrCreateInstance(modal).show();
+        openAfterDiscord = false;
+      }
       clearInterval(t);
     }
   }, 50);
