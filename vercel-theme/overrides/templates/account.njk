@@ -1,24 +1,33 @@
 <section class="container component py-5-nav" style="min-height:60vh;display:flex;align-items:center;justify-content:center;text-align:center">
-  <div class="cl-dash-card p-4 p-md-5" style="max-width:680px;width:100%">
+  <div class="cl-dash-card p-4 p-md-5" style="max-width:720px;width:100%">
     <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;border-radius:16px;background:rgba(59,130,246,.14);color:#60a5fa">
       <i class="fa fa-right-to-bracket" style="font-size:1.6rem"></i>
     </div>
-    <h1 class="fw-bold mb-2">Redirecting to Login</h1>
+    <h1 class="fw-bold mb-2">Customer Login</h1>
     <p style="color:#9ab0cf" class="mb-4">
-      We’re sending you to the secure customer login.
+      Continue to the secure SellAuth login to access your orders, balance, and tickets.
     </p>
-    <a class="btn cl-dash-btn" href="https://clownium.mysellauth.com/customer/dashboard">Continue to Login</a>
+
+    <div class="d-flex flex-column align-items-center gap-3">
+      <a class="cl-login-stroke" href="https://clownium.mysellauth.com/customer/dashboard?login=1">
+        <i class="fa fa-envelope"></i>
+        Continue to Login
+      </a>
+      <small style="color:#7f96ba">You’ll finish sign in on the secure customer dashboard.</small>
+    </div>
   </div>
 </section>
 
 <script>
 (function () {
-  var target = 'https://clownium.mysellauth.com/customer/dashboard';
-  try {
-    window.location.replace(target);
-  } catch (_) {
-    window.location.href = target;
-  }
+  var target = 'https://clownium.mysellauth.com/customer/dashboard?login=1';
+  setTimeout(function () {
+    try {
+      window.location.replace(target);
+    } catch (_) {
+      window.location.href = target;
+    }
+  }, 350);
 })();
 </script>
 
@@ -30,13 +39,39 @@
   color:#e6efff;
   box-shadow:0 24px 60px rgba(0,10,30,.6), 0 0 0 1px rgba(0,0,0,.4);
 }
-.cl-dash-btn{
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:.8rem 1.4rem; border-radius:12px; border:0;
-  font-weight:800; color:#041224; text-decoration:none;
-  background:linear-gradient(90deg,#1d4ed8,#3b82f6);
-  box-shadow:0 10px 26px rgba(0,90,255,.35);
-  transition:transform .16s ease, box-shadow .2s ease;
+.cl-login-stroke{
+  position:relative;
+  color:#c8d8ff;
+  font-weight:700;
+  padding:12px 18px;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border-radius:12px;
+  transition:all .25s ease;
+  background:radial-gradient(140px 60px at 50% 120%, rgba(0,90,255,0.15), transparent 60%);
+  min-width:240px;
 }
-.cl-dash-btn:hover{ transform:translateY(-1px); box-shadow:0 14px 30px rgba(0,90,255,.5) }
+.cl-login-stroke::before,
+.cl-login-stroke::after{
+  content:"";
+  position:absolute;
+  inset:6px;
+  pointer-events:none;
+  background:
+    linear-gradient(#0040ff, #0040ff) left top/14px 2px no-repeat,
+    linear-gradient(#0040ff, #0040ff) left top/2px 14px no-repeat,
+    linear-gradient(#0040ff, #0040ff) right bottom/14px 2px no-repeat,
+    linear-gradient(#0040ff, #0040ff) right bottom/2px 14px no-repeat;
+  border-radius:10px;
+  box-shadow:0 0 12px rgba(0,85,255,0.25);
+  opacity:1;
+}
+.cl-login-stroke:hover{
+  color:#fff;
+  transform:translateY(-1px);
+  text-shadow:0 0 8px rgba(0,110,255,0.7);
+}
 </style>
