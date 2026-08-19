@@ -144,7 +144,7 @@ async function main() {
 
   const productPages = data.products
     .filter((p) => p.type !== 'group')
-    .map((p) => ({ name: 'product', out: `product/${p.path}.html`, extra: { product: p } }));
+    .map((p) => ({ name: 'product', out: `product/${p.path}/index.html`, extra: { product: p } }));
 
   for (const page of [...pages, ...productPages]) {
     const tpl = settings.templates[page.name] || SYNTH_TEMPLATES[page.name];
